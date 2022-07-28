@@ -8,7 +8,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -96,11 +97,12 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         val taskList = findViewById<TableLayout>(R.id.taskList)
         val row = TableRow(applicationContext)
         taskList.addView(row, taskList.childCount)
-        row.layoutParams = TableLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        row.layoutParams = TableLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
 
         val deleteButton = ImageButton(applicationContext)
         row.addView(deleteButton)
-        deleteButton.layoutParams = TableRow.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        deleteButton.layoutParams = TableRow.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+        deleteButton.setPadding(6,6,6,6)
         deleteButton.setImageResource(android.R.drawable.ic_menu_delete)
         deleteButton.background = roundedCorners
         deleteButton.setOnClickListener {
@@ -109,7 +111,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 
         val textView = TextView(applicationContext)
         row.addView(textView)
-        textView.layoutParams = TableRow.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f)
+        textView.layoutParams = TableRow.LayoutParams(0, MATCH_PARENT, 1f)
         textView.gravity = Gravity.CENTER_VERTICAL
         textView.text = description
         textView.setTextColor(taskDescTmpl.textColors)
@@ -123,12 +125,12 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         val moveView = LinearLayout(applicationContext)
         row.addView(moveView)
         moveView.orientation = LinearLayout.VERTICAL
-        moveView.layoutParams = TableRow.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        moveView.layoutParams = TableRow.LayoutParams(WRAP_CONTENT, MATCH_PARENT)
         moveView.weightSum = 0f
 
         val buttonUp = ImageButton(applicationContext)
         moveView.addView(buttonUp)
-        buttonUp.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        buttonUp.layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, MATCH_PARENT, 0.5f)
         buttonUp.setImageResource(android.R.drawable.arrow_up_float)
         buttonUp.background = roundedCorners
         buttonUp.setOnClickListener {
@@ -137,7 +139,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 
         val buttonDown = ImageButton(applicationContext)
         moveView.addView(buttonDown)
-        buttonDown.layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        buttonDown.layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, MATCH_PARENT, 0.5f)
         buttonDown.setImageResource(android.R.drawable.arrow_down_float)
         buttonDown.background = roundedCorners
         buttonDown.setOnClickListener {

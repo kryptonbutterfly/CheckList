@@ -10,6 +10,7 @@
         android:id="@+id/menu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/colorEdgeEffect"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -25,14 +26,14 @@
             android:background="@drawable/rounded_corner"
             android:contentDescription="@string/delete_all_entries"
             android:onClick="onDeleteAllClick"
-            android:padding="8dp"
+            android:padding="4dp"
             app:srcCompat="@android:drawable/ic_menu_delete"
             tools:ignore="SpeakableTextPresentCheck" />
 
         <Space
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="20"
+            android:layout_weight="30"
             android:visibility="visible" />
 
         <ImageButton
@@ -45,22 +46,28 @@
             android:background="@drawable/rounded_corner"
             android:contentDescription="@string/create_new_entry"
             android:onClick="onAddClick"
-            android:padding="8dp"
+            android:padding="4dp"
             app:srcCompat="@android:drawable/ic_menu_add"
             tools:ignore="SpeakableTextPresentCheck" />
 
     </LinearLayout>
 
-    <TableLayout
-        android:id="@+id/taskList"
-        android:layout_width="match_parent"
+    <ScrollView
+        android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/menu"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="SpeakableTextPresentCheck">
 
-    </TableLayout>
+        <TableLayout
+            android:id="@+id/taskList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </TableLayout>
+    </ScrollView>
 
     <TextView
         android:id="@+id/taskDescriptionTextTemplate"
