@@ -1,4 +1,5 @@
-![CheckList icon](https://raw.githubusercontent.com/tinycodecrank/CheckList/master/app/src/main/res/mipmap-xhdpi/ic_launcher.webp)
+<img width="82" align="left" src="https://raw.githubusercontent.com/tinycodecrank/CheckList/master/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp"/>
+
 # CheckList
 
 A primitive checklist app.
