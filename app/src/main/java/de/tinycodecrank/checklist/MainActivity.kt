@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         val taskList = findViewById<TableLayout>(R.id.taskList)
         ObjectOutputStream(openFileOutput(TASKS_LIST_FILE, MODE_PRIVATE)).use {
                 it.writeInt(taskList.size)
-                repeat(taskList.size) { index -> it.writeUTF(((taskList[index] as TableRow)[1] as TextView).text.toString())
+                repeat(taskList.size) { index -> it.writeUTF(((taskList[index] as TableRow)[0] as TextView).text.toString())
             }
         }
     }
@@ -99,16 +99,6 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         taskList.addView(row, taskList.childCount)
         row.layoutParams = TableLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
 
-        val deleteButton = ImageButton(applicationContext)
-        row.addView(deleteButton)
-        deleteButton.layoutParams = TableRow.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
-        deleteButton.setPadding(6,6,6,6)
-        deleteButton.setImageResource(android.R.drawable.ic_menu_delete)
-        deleteButton.background = roundedCorners
-        deleteButton.setOnClickListener {
-            taskList.removeView(row)
-        }
-
         val textView = TextView(applicationContext)
         row.addView(textView)
         textView.layoutParams = TableRow.LayoutParams(0, MATCH_PARENT, 1f)
@@ -120,6 +110,16 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
             intent.putExtra(TASK_ID, taskList.indexOfChild(row))
             intent.putExtra(TASK_DESCRIPTION, textView.text)
             getContent.launch(intent)
+        }
+
+        val deleteButton = ImageButton(applicationContext)
+        row.addView(deleteButton)
+        deleteButton.layoutParams = TableRow.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+        deleteButton.setPadding(6,6,6,6)
+        deleteButton.setImageResource(android.R.drawable.ic_menu_delete)
+        deleteButton.background = roundedCorners
+        deleteButton.setOnClickListener {
+            taskList.removeView(row)
         }
 
         val moveView = LinearLayout(applicationContext)
