@@ -20,6 +20,7 @@ import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
 private const val TASKS_LIST_FILE = "TasksListData.txt"
+private const val TEXT_COLUMN = 0;
 class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     private val roundedCorners = Drawable.createFromPath("@drawable/rounded_corner")
 
@@ -45,7 +46,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         val taskList = findViewById<TableLayout>(R.id.taskList)
         ObjectOutputStream(openFileOutput(TASKS_LIST_FILE, MODE_PRIVATE)).use {
                 it.writeInt(taskList.size)
-                repeat(taskList.size) { index -> it.writeUTF(((taskList[index] as TableRow)[0] as TextView).text.toString())
+                repeat(taskList.size) { index -> it.writeUTF(((taskList[index] as TableRow)[TEXT_COLUMN] as TextView).text.toString())
             }
         }
     }
@@ -84,7 +85,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         val taskList = findViewById<TableLayout>(R.id.taskList)
         if (taskId in IntRange(0, taskList.childCount - 1)) {
             val taskEntry = taskList[taskId] as TableRow
-            val text = taskEntry[1] as TextView
+            val text = taskEntry[TEXT_COLUMN] as TextView
             text.text = description
         }
         else
@@ -152,8 +153,8 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         Log.i("MOVE UP", "Moving row $index to ${index - 1}")
         if (index > 0) {
             val previous = taskList[index - 1] as TableRow
-            val prevText = previous[1] as TextView
-            val currText = row[1] as TextView
+            val prevText = previous[TEXT_COLUMN] as TextView
+            val currText = row[TEXT_COLUMN] as TextView
             val swap = prevText.text
             prevText.text = currText.text
             currText.text = swap
@@ -165,8 +166,8 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         Log.i("MOVE DOWN", "Moving row $index to ${index + 1}")
         if (index < taskList.size - 1) {
             val next = taskList[index + 1] as TableRow
-            val nextText = next[1] as TextView
-            val currText = row[1] as TextView
+            val nextText = next[TEXT_COLUMN] as TextView
+            val currText = row[TEXT_COLUMN] as TextView
             val swap = nextText.text
             nextText.text = currText.text
             currText.text = swap
