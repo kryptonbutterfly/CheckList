@@ -1,4 +1,4 @@
-package de.tinycodecrank.checklist
+package kryptonbutterfly.checklist
 
 import android.app.AlertDialog
 import android.app.Dialog

@@ -1,4 +1,4 @@
-package de.tinycodecrank.checklist
+package kryptonbutterfly.checklist
 
 import android.app.Activity
 import android.content.Context
@@ -27,7 +27,7 @@ class CreateTaskActivity : AppCompatActivity() {
         }, 0)
     }
 
-    fun onApply(view: View) {
+    fun onApply(@Suppress("UNUSED_PARAMETER") view: View) {
         val taskDescription = findViewById<TextInputEditText>(R.id.taskDescription)
         val result = Intent()
         result.putExtra(TASK_DESCRIPTION, taskDescription.text.toString())
@@ -39,7 +39,7 @@ class CreateTaskActivity : AppCompatActivity() {
         finish()
     }
 
-    fun onCancel(view: View) {
+    fun onCancel(@Suppress("UNUSED_PARAMETER") view: View) {
         setResult(Activity.RESULT_CANCELED)
         finish()
     }

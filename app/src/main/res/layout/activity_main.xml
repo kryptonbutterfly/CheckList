@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context="kryptonbutterfly.checklist.MainActivity">
 
     <LinearLayout
         android:id="@+id/menu"
@@ -35,6 +35,21 @@
             android:layout_height="wrap_content"
             android:layout_weight="30"
             android:visibility="visible" />
+
+        <ImageButton
+            android:id="@+id/restoreButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:background="@drawable/rounded_corner"
+            android:contentDescription="@string/restore"
+            android:onClick="onRestoreClick"
+            android:padding="4dp"
+            android:visibility="invisible"
+            app:srcCompat="@android:drawable/ic_menu_revert"
+            tools:ignore="SpeakableTextPresentCheck" />
 
         <ImageButton
             android:id="@+id/addButton"
