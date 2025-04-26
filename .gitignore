@@ -15,3 +15,4 @@
 local.properties
 *.apk
 /gradle/wrapper/gradle-wrapper.jar
+/app/release/
