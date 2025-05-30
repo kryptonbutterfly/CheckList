@@ -8,9 +8,8 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
-
-const val TASK_DESCRIPTION = "TASK"
-const val TASK_ID = "TASK_ID"
+import kryptonbutterfly.checklist.Constants.TASK_DESCRIPTION
+import kryptonbutterfly.checklist.Constants.TASK_ID
 
 class CreateTaskActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -15,12 +15,17 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.get
 import androidx.core.view.size
+import kryptonbutterfly.checklist.Constants.CREATE_TASK
+import kryptonbutterfly.checklist.Constants.MOVE_DOWN
+import kryptonbutterfly.checklist.Constants.MOVE_UP
+import kryptonbutterfly.checklist.Constants.TASKS_LIST_FILE
+import kryptonbutterfly.checklist.Constants.TASK_DESCRIPTION
+import kryptonbutterfly.checklist.Constants.TASK_ID
+import kryptonbutterfly.checklist.Constants.TEXT_COLUMN
+import kryptonbutterfly.checklist.Constants.UNDELETE_TASK
 import java.io.File
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
-
-private const val TASKS_LIST_FILE = "TasksListData.txt"
-private const val TEXT_COLUMN = 0
 
 class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     private val roundedCorners = Drawable.createFromPath("@drawable/rounded_corner")
@@ -34,14 +39,18 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 
     override fun onResume() {
         super.onResume()
-        if (findViewById<TableLayout>(R.id.taskList).size == 0 && File(this.filesDir, TASKS_LIST_FILE).exists()) {
-            ObjectInputStream(openFileInput(TASKS_LIST_FILE)).use { iStream ->
-                if (iStream.available() > 0) {
-                    repeat(iStream.readInt()) { createTask(iStream.readUTF()) }
-                    if (iStream.available() > 0 && iStream.readBoolean())
-                        setLastDeleted(DeletedTask(iStream.readInt(), iStream.readUTF()))
-                }
-            }
+        if (findViewById<TableLayout>(R.id.taskList).size != 0 || !File(this.filesDir, TASKS_LIST_FILE).exists())
+            return
+
+        ObjectInputStream(openFileInput(TASKS_LIST_FILE)).use { iStream ->
+            if (iStream.available() <= 0)
+                return
+
+            repeat(iStream.readInt()) { createTask(iStream.readUTF()) }
+            if (iStream.available() <= 0 || !iStream.readBoolean())
+                return
+
+            setLastDeleted(DeletedTask(iStream.readInt(), iStream.readUTF()))
         }
     }
 
@@ -109,14 +118,15 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     }
 
     private fun createTask(description:CharSequence) {
+        Log.i(CREATE_TASK, "Creating new task.")
         val taskList = findViewById<TableLayout>(R.id.taskList)
         createTask(taskList, description, taskList.size)
     }
 
     private fun undeleteTask(task: DeletedTask) {
+        Log.i(UNDELETE_TASK, "Undeleting task")
         val taskList = findViewById<TableLayout>(R.id.taskList)
         createTask(taskList, task.description, task.index)
-        setLastDeleted(null)
     }
 
     private fun setLastDeleted(task: DeletedTask?) {
@@ -126,10 +136,13 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     }
 
     private fun createTask(taskList: TableLayout, description:CharSequence, index: Int) {
+        val i = index.coerceIn(0, taskList.size)
+        Log.i(CREATE_TASK, "Adding task @ $i")
+
         val taskDescTmpl = findViewById<TextView>(R.id.taskDescriptionTextTemplate)
 
         val row = TableRow(applicationContext)
-        taskList.addView(row, index)
+        taskList.addView(row, i)
         row.layoutParams = TableLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
 
         val textView = TextView(applicationContext)
@@ -179,31 +192,34 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         buttonDown.setOnClickListener {
             moveDown(taskList, row)
         }
+        setLastDeleted(null)
     }
 
     private fun moveUp(taskList: TableLayout, row: TableRow) {
         val index = taskList.indexOfChild(row)
-        Log.i("MOVE UP", "Moving row $index to ${index - 1}")
-        if (index > 0) {
-            val previous = taskList[index - 1] as TableRow
-            val prevText = previous[TEXT_COLUMN] as TextView
-            val currText = row[TEXT_COLUMN] as TextView
-            val swap = prevText.text
-            prevText.text = currText.text
-            currText.text = swap
-        }
+        Log.i(MOVE_UP, "Moving row $index to ${index - 1}")
+        if (index <= 0)
+            return
+
+        val previous = taskList[index - 1] as TableRow
+        val prevText = previous[TEXT_COLUMN] as TextView
+        val currText = row[TEXT_COLUMN] as TextView
+        val swap = prevText.text
+        prevText.text = currText.text
+        currText.text = swap
     }
 
     private fun moveDown(taskList: TableLayout, row: TableRow) {
         val index = taskList.indexOfChild(row)
-        Log.i("MOVE DOWN", "Moving row $index to ${index + 1}")
-        if (index < taskList.size - 1) {
-            val next = taskList[index + 1] as TableRow
-            val nextText = next[TEXT_COLUMN] as TextView
-            val currText = row[TEXT_COLUMN] as TextView
-            val swap = nextText.text
-            nextText.text = currText.text
-            currText.text = swap
-        }
+        Log.i(MOVE_DOWN, "Moving row $index to ${index + 1}")
+        if (index >= taskList.size - 1)
+            return
+
+        val next = taskList[index + 1] as TableRow
+        val nextText = next[TEXT_COLUMN] as TextView
+        val currText = row[TEXT_COLUMN] as TextView
+        val swap = nextText.text
+        nextText.text = currText.text
+        currText.text = swap
     }
 }
