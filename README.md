@@ -1,10 +1,10 @@
-<img width="82" align="left" src="https://raw.githubusercontent.com/tinycodecrank/CheckList/master/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp"/>
+<img width="82" align="left" src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp"/>
 
 # CheckList
 
 A primitive checklist app.
 
-<img src="https://raw.githubusercontent.com/tinycodecrank/CheckList/master/md/Screenshot_CheckList.png" width="200"/>
+<img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_CheckList.png" width="200"/>
 
 ## Download
-[CheckList.apk](https://github.com/tinycodecrank/CheckList/releases/download/v1.2.0/CheckList.apk)
+[CheckList.apk](https://github.com/kryptonbutterfly/CheckList/releases/download/v1.2.0/CheckList.apk)
