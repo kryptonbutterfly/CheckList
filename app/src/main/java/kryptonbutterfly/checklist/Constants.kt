@@ -2,7 +2,6 @@ package kryptonbutterfly.checklist
 
 object Constants
 {
-    const val TASKS_LIST_FILE = "TasksListData.txt"
     const val TEXT_COLUMN = 0
     const val UNDELETE_TASK = "UNDELETE TASK"
     const val CREATE_TASK = "CREATE TASK"

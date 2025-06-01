@@ -13,19 +13,19 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.core.view.size
 import kryptonbutterfly.checklist.Constants.CREATE_TASK
 import kryptonbutterfly.checklist.Constants.MOVE_DOWN
 import kryptonbutterfly.checklist.Constants.MOVE_UP
-import kryptonbutterfly.checklist.Constants.TASKS_LIST_FILE
 import kryptonbutterfly.checklist.Constants.TASK_DESCRIPTION
 import kryptonbutterfly.checklist.Constants.TASK_ID
 import kryptonbutterfly.checklist.Constants.TEXT_COLUMN
 import kryptonbutterfly.checklist.Constants.UNDELETE_TASK
-import java.io.File
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
+import kryptonbutterfly.checklist.persistence.Data
+import kryptonbutterfly.checklist.persistence.load
+import kryptonbutterfly.checklist.persistence.save
 
 class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     private val roundedCorners = Drawable.createFromPath("@drawable/rounded_corner")
@@ -39,35 +39,24 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 
     override fun onResume() {
         super.onResume()
-        if (findViewById<TableLayout>(R.id.taskList).size != 0 || !File(this.filesDir, TASKS_LIST_FILE).exists())
+        if (findViewById<TableLayout>(R.id.taskList).size != 0)
             return
-
-        ObjectInputStream(openFileInput(TASKS_LIST_FILE)).use { iStream ->
-            if (iStream.available() <= 0)
-                return
-
-            repeat(iStream.readInt()) { createTask(iStream.readUTF()) }
-            if (iStream.available() <= 0 || !iStream.readBoolean())
-                return
-
-            setLastDeleted(DeletedTask(iStream.readInt(), iStream.readUTF()))
+        load(this) {
+            Log.i("ON RESUME", "initializing from data: $it")
+            it.tasks.forEach { text -> createTask(text) }
+            if (it.deleted.isNotEmpty())
+                setLastDeleted(it.deleted.last())
         }
     }
 
     override fun onPause() {
         super.onPause()
-
         val taskList = findViewById<TableLayout>(R.id.taskList)
-        ObjectOutputStream(openFileOutput(TASKS_LIST_FILE, MODE_PRIVATE)).use {
-            it.writeInt(taskList.size)
-            repeat(taskList.size) { index ->
-                it.writeUTF(((taskList[index] as TableRow)[TEXT_COLUMN] as TextView).text.toString())
+        save(this) { data ->
+            taskList.forEach {
+                data.tasks.add(((it as TableRow)[TEXT_COLUMN] as TextView).text.toString())
             }
-            it.writeBoolean(this.lastDeleted != null)
-            this.lastDeleted?.let { task: DeletedTask ->
-                it.writeInt(task.index)
-                it.writeUTF(task.description.toString())
-            }
+            this.lastDeleted?.let(data.deleted::add)
         }
     }
 
