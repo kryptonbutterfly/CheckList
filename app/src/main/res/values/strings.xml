@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">CheckList</string>
     <string name="title_activity_create_task">CreateTaskActivity</string>
+    <string name="title_activity_main">Task List</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="HintTaskDescription">Task</string>
@@ -9,4 +10,14 @@
     <string name="delete_all_entries">Delete all Entries</string>
     <string name="create_new_entry">Create new Entry</string>
     <string name="restore">restore</string>
+    <string name="settings">Settings</string>
+    <string name="undo_max_length">max history length</string>
+    <string name="undo">Undo</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="switchTrackCreateTitle">create Task</string>
+    <string name="switchTrackDeleteTitle">delete Task</string>
+    <string name="switchTrackMoveTitle">move Task</string>
+    <string name="switchTrackRenameTitle">rename Task</string>
+    <string name="trackActivitiesTitle">Track Activities</string>
+    <string name="maxHistorySizeTitle">Max history size</string>
 </resources>

@@ -1,0 +1,32 @@
+package kryptonbutterfly.checklist.persistence
+
+import android.content.ContextWrapper
+import com.google.gson.annotations.Expose
+import kryptonbutterfly.checklist.Constants.GSON
+import java.io.File
+import java.io.Serializable
+
+private const val SETTINGS_FILE: String = "Settings.json"
+
+fun loadSettings(context: ContextWrapper):Settings {
+    val file = File(context.filesDir, SETTINGS_FILE)
+    if (!file.exists())
+        return Settings()
+    val json = file.bufferedReader().use { it.readText() }
+    return GSON.fromJson(json, Settings::class.java)
+}
+
+fun saveSettings(context: ContextWrapper, settings: Settings) {
+    val json = GSON.toJson(settings)
+    val file = File(context.filesDir, SETTINGS_FILE)
+    if (file.parentFile != null && !file.parentFile!!.exists())
+        file.parentFile!!.mkdirs()
+    file.bufferedWriter().use { it.write(json) }
+}
+
+data class Settings(
+    @Expose var undoLength: Int = 16,
+    @Expose var trackCreate: Boolean = false,
+    @Expose var trackRename: Boolean = true,
+    @Expose var trackMove: Boolean = false,
+    @Expose var trackDelete: Boolean = true): Serializable

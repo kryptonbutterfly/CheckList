@@ -1,17 +1,31 @@
 package kryptonbutterfly.checklist
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import kryptonbutterfly.checklist.actions.Action
+import kryptonbutterfly.checklist.actions.ActionAdapter
+
 object Constants
 {
     const val TEXT_COLUMN = 0
-    const val UNDELETE_TASK = "UNDELETE TASK"
     const val CREATE_TASK = "CREATE TASK"
-    const val MOVE_UP = "MOVE UP"
-    const val MOVE_DOWN = "MOVE DOWN"
+    const val MOVE_TASK = "MOVE TASK"
 
     const val MSG_DELETE_ALL_TASKS = "Delete all Tasks?"
     const val TEXT_DELETE = "Delete"
     const val TEXT_CANCEL = "Cancel"
 
-    const val TASK_DESCRIPTION = "TASK"
-    const val TASK_ID = "TASK_ID"
+    const val ACTION = "ACTION"
+    const val INDEX = "INDEX"
+    const val DESCRIPTION = "DESCRIPTION"
+
+    const val SETTINGS = "SETTINGS"
+
+    const val JSON_TYPE = ":type"
+    const val JSON_DATA = "data"
+
+    val GSON: Gson = GsonBuilder()
+        .setPrettyPrinting()
+        .registerTypeAdapter(Action::class.java, ActionAdapter)
+        .create()
 }

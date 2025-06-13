@@ -4,7 +4,11 @@
 
 A primitive checklist app.
 
-<img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_CheckList.png" width="200"/>
+<div>
+    <img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_CheckList.webp" width="200"/>
+    <img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_Edit_Task.webp" width="200"/>
+    <img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_Settings.webp" width="200"/>
+</div>
 
 ## Download
-[CheckList.apk](https://github.com/kryptonbutterfly/CheckList/releases/download/v1.3.0/CheckList.apk)
+[CheckList.apk](https://github.com/kryptonbutterfly/CheckList/releases/download/v2.0.0/CheckList.apk)
