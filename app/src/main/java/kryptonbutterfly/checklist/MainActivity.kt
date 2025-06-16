@@ -12,6 +12,7 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.core.view.size
@@ -27,6 +28,8 @@ import kryptonbutterfly.checklist.misc.Stack
 import kryptonbutterfly.checklist.persistence.*
 
 class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
+    private var light: Int = 0
+    private var dark: Int = 0
     private val roundedCorners = Drawable.createFromPath("@drawable/rounded_corner")
 
     private val history = Stack<Action<*>>()
@@ -54,6 +57,8 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        this.light = ContextCompat.getColor(this, R.color.light)
+        this.dark = ContextCompat.getColor(this, R.color.dark)
     }
 
     override fun onResume() {
@@ -68,7 +73,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         data.tasks.forEach(this::createTask)
         history.backingList = data.history
 
-        updateUndo()
+        updateUI()
     }
 
     override fun onPause() {
@@ -107,7 +112,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     override fun onDialogPositiveClick() {
         val taskList = findViewById<TableLayout>(R.id.taskList)
         taskList.removeAllViews()
-        clearDeleted()
+        history.clear()
     }
 
     fun onRestoreClick(@Suppress("UNUSED_PARAMETER") view: View) {
@@ -137,10 +142,6 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         createTask(CreateTask(description, taskList.size))
     }
 
-    private fun clearDeleted() {
-        history.clear()
-    }
-
     private fun createTask(action: CreateTask) {
         Log.i(CREATE_TASK, "Adding task @ ${action.index}")
         val taskList = findViewById<TableLayout>(R.id.taskList)
@@ -152,6 +153,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         val row = TableRow(applicationContext)
         taskList.addView(row, i)
         row.layoutParams = TableLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        row.setPadding(16, 0, 16, 0)
 
         val textView = TextView(applicationContext)
         row.addView(textView)
@@ -282,7 +284,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
             }
             is DeleteAll -> history.clear()
         }
-        updateUndo()
+        updateUI()
     }
 
     private fun redo(action: Action<*>) {
@@ -290,13 +292,17 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
             is CreateTask -> deleteTask(action.inverse())
             is RenameTask -> renameTask(action.inverse())
             is MoveTask -> moveTask(action.inverse())
-            is DeleteTask ->  createTask(action.inverse())
+            is DeleteTask -> createTask(action.inverse())
             is DeleteAll -> {}
         }
-        updateUndo()
+        updateUI()
     }
 
-    private fun updateUndo() {
+    private fun updateUI() {
+        val taskList = findViewById<TableLayout>(R.id.taskList)
+        for (i in 0 until taskList.size)
+            (taskList[i] as TableRow)
+                .setBackgroundColor(if (i % 2 == 0) dark else light)
         findViewById<ImageButton>(R.id.restoreButton).visibility =
             if (history.isEmpty()) View.INVISIBLE else View.VISIBLE
     }

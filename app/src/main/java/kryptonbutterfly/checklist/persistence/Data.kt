@@ -1,7 +1,6 @@
 package kryptonbutterfly.checklist.persistence
 
 import android.content.ContextWrapper
-import android.util.Log
 import com.google.gson.annotations.Expose
 import kryptonbutterfly.checklist.Constants.GSON
 import kryptonbutterfly.checklist.actions.Action
