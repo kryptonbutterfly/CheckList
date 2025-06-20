@@ -30,12 +30,11 @@
             android:minHeight="48dp"
             android:onClick="onDeleteAllClick"
             android:padding="4dp"
-            app:srcCompat="@android:drawable/ic_menu_delete"
-            tools:ignore="SpeakableTextPresentCheck" />
+            app:srcCompat="@android:drawable/ic_menu_delete" />
 
         <Space
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="30"
             android:visibility="visible" />
 
@@ -53,8 +52,7 @@
             android:onClick="onRestoreClick"
             android:padding="4dp"
             android:visibility="invisible"
-            app:srcCompat="@android:drawable/ic_menu_revert"
-            tools:ignore="SpeakableTextPresentCheck" />
+            app:srcCompat="@android:drawable/ic_menu_revert" />
 
         <ImageButton
             android:id="@+id/addButton"
@@ -69,8 +67,7 @@
             android:minHeight="48dp"
             android:onClick="onAddClick"
             android:padding="4dp"
-            app:srcCompat="@android:drawable/ic_menu_add"
-            tools:ignore="SpeakableTextPresentCheck" />
+            app:srcCompat="@android:drawable/ic_menu_add" />
 
     </LinearLayout>
 
@@ -88,57 +85,71 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <LinearLayout
-                android:id="@+id/toolbar"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?android:attr/colorEdgeEffect"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toTopOf="@+id/taskList"
+                app:layout_constraintBottom_toTopOf="@id/taskList"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <Space
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="30" />
-
-                <ImageButton
-                    android:id="@+id/imageButton"
+                <ImageView
+                    android:id="@+id/exportButton"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:layout_margin="4dp"
-                    android:layout_weight="1"
-                    android:adjustViewBounds="true"
+                    android:layout_margin="8dp"
+                    android:contentDescription="@string/export"
+                    android:onClick="onExportClick"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/settingsButton"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@android:drawable/ic_menu_save" />
+
+                <ImageButton
+                    android:id="@+id/settingsButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_margin="8dp"
                     android:backgroundTint="@android:color/transparent"
                     android:contentDescription="@string/settings"
                     android:onClick="onSettingsClick"
-                    app:srcCompat="@drawable/settings_dots"
-                    tools:ignore="SpeakableTextPresentCheck" />
-            </LinearLayout>
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/settings_dots" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TableLayout
                 android:id="@+id/taskList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/toolbar">
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
 
             </TableLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <TextView
-        android:id="@+id/taskDescriptionTextTemplate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        app:layout_constraintBottom_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+    <TableRow
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/taskDescriptionTextTemplate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:textColor="@android:color/primary_text_dark" />
+    </TableRow>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

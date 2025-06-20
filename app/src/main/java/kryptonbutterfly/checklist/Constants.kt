@@ -24,6 +24,9 @@ object Constants
     const val JSON_TYPE = ":type"
     const val JSON_DATA = "data"
 
+    const val HTML_PREFIX = "<p dir=\"ltr\">"
+    const val HTML_POSTFIX = "</p>\n"
+
     val GSON: Gson = GsonBuilder()
         .setPrettyPrinting()
         .registerTypeAdapter(Action::class.java, ActionAdapter)

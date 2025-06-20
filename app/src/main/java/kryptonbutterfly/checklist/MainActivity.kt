@@ -1,9 +1,14 @@
 package kryptonbutterfly.checklist
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
+import android.text.Html
+import android.text.SpannableString
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -12,6 +17,7 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
 import androidx.core.view.get
@@ -19,6 +25,8 @@ import androidx.core.view.size
 import kryptonbutterfly.checklist.Constants.ACTION
 import kryptonbutterfly.checklist.Constants.CREATE_TASK
 import kryptonbutterfly.checklist.Constants.DESCRIPTION
+import kryptonbutterfly.checklist.Constants.HTML_POSTFIX
+import kryptonbutterfly.checklist.Constants.HTML_PREFIX
 import kryptonbutterfly.checklist.Constants.INDEX
 import kryptonbutterfly.checklist.Constants.MOVE_TASK
 import kryptonbutterfly.checklist.Constants.SETTINGS
@@ -27,7 +35,10 @@ import kryptonbutterfly.checklist.actions.*
 import kryptonbutterfly.checklist.misc.Stack
 import kryptonbutterfly.checklist.persistence.*
 
+const val REQUEST_PERMISSION_CODE = 0
+
 class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
+
     private var light: Int = 0
     private var dark: Int = 0
     private val roundedCorners = Drawable.createFromPath("@drawable/rounded_corner")
@@ -42,6 +53,12 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
                     event(action as Action<*>)
                 }
             }
+        }
+
+    private val getExport =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK)
+                result.data?.data?.let(this::export)
         }
 
     private val settingsResult =
@@ -90,6 +107,14 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         saveData(this, data)
     }
 
+    fun onExportClick(@Suppress("UNUSED_PARAMETER") view: View) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED)
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_PERMISSION_CODE)
+        else
+            openFilePicker()
+    }
+
+
     fun onSettingsClick(@Suppress("UNUSED_PARAMETER") view: View) {
         val intent = Intent(this, SettingsActivity::class.java)
         intent.putExtra(SETTINGS, this.settings)
@@ -112,11 +137,49 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     override fun onDialogPositiveClick() {
         val taskList = findViewById<TableLayout>(R.id.taskList)
         taskList.removeAllViews()
-        history.clear()
+        event(DeleteAll(taskList.size))
     }
 
     fun onRestoreClick(@Suppress("UNUSED_PARAMETER") view: View) {
         history.remove()?.let(this::redo)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQUEST_PERMISSION_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    openFilePicker()
+            }
+        }
+    }
+
+    private fun openFilePicker(){
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "**/*.md"
+        intent.putExtra(Intent.EXTRA_TITLE, "tasks.md")
+        getExport.launch(intent)
+    }
+
+    private fun export(uri: Uri) {
+        val taskList = findViewById<TableLayout>(R.id.taskList)
+        val sb = StringBuilder()
+        taskList.forEach {
+            val text = SpannableString(((it as TableRow)[TEXT_COLUMN] as TextView).text.toString())
+            val html = Html.toHtml(text, Html.FROM_HTML_MODE_LEGACY)
+            val markdown = html.substring(HTML_PREFIX.length, html.length - HTML_POSTFIX.length)
+            sb.append(" * ").append(markdown).append("\n")
+        }
+        val result = sb.toString()
+        contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { br ->
+            Log.i("EXPORTING", "File: ${uri}\tdata:\n${result}")
+            br.write(result)
+        }
     }
 
     private fun renameTask(action: RenameTask) {
@@ -157,17 +220,19 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 
         val textView = TextView(applicationContext)
         row.addView(textView)
-        textView.layoutParams = TableRow.LayoutParams(0, MATCH_PARENT, 1f)
-        textView.gravity = Gravity.CENTER_VERTICAL
+        textView.layoutParams = taskDescTmpl.layoutParams
         textView.text = action.description
         textView.setTextColor(taskDescTmpl.textColors)
+        textView.setPadding(0,8,0,8)
         textView.setOnClickListener {
             editTask(taskList.indexOfChild(row), textView.text.toString())
         }
 
         val deleteButton = ImageButton(applicationContext)
         row.addView(deleteButton)
-        deleteButton.layoutParams = TableRow.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+        val deleteLayout = TableRow.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+        deleteLayout.gravity = Gravity.CENTER_VERTICAL
+        deleteButton.layoutParams = deleteLayout
         deleteButton.setPadding(6, 6, 6, 6)
         deleteButton.setImageResource(android.R.drawable.ic_menu_delete)
         deleteButton.background = roundedCorners
