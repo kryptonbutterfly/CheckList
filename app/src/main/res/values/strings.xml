@@ -21,4 +21,12 @@
     <string name="switchTrackRenameTitle">rename Task</string>
     <string name="trackActivitiesTitle">Track Activities</string>
     <string name="maxHistorySizeTitle">Max history size</string>
+    <string name="title_activity_create_category">CreateCategory</string>
+    <string name="add_category">add new category</string>
+    <string name="category_icon_description">Category icon</string>
+    <string name="HintCategoryName">Category name</string>
+    <string name="browseIconButtonText">Select Icon</string>
+    <string name="categoryIconDescription">category icon</string>
+    <string name="categoriesTitle">Categories</string>
+    <string name="pruneButtonText">cleanup</string>
 </resources>

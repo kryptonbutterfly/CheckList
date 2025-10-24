@@ -7,27 +7,77 @@
     android:background="@android:color/background_dark"
     tools:context="kryptonbutterfly.checklist.CreateTaskActivity">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:attr/colorEdgeEffect"
-        app:hintEnabled="true"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/taskDescription"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/categoryInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/HintTaskDescription"
-            android:inputType="textAutoCorrect|textMultiLine"
-            android:minHeight="48dp" />
+            android:background="?android:attr/colorEdgeEffect"
+            app:hintEnabled="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/categoryName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/HintTaskDescription"
+                android:inputType="textAutoCorrect|textMultiLine"
+                android:minHeight="48dp"
+                tools:ignore="VisualLintTextFieldSize" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/categoryInput">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Spinner
+                    android:id="@+id/spinnerCategories"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
+                    android:layout_weight="1" />
+
+                <ImageButton
+                    android:id="@+id/addCategoryBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:layout_weight="0"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/rounded_corner"
+                    android:contentDescription="@string/add_category"
+                    android:minWidth="48dp"
+                    android:minHeight="48dp"
+                    android:onClick="onAddCategory"
+                    android:padding="4dp"
+                    android:tooltipText="@string/add_category"
+                    app:srcCompat="@android:drawable/ic_menu_add"
+                    tools:ignore="TouchTargetSizeCheck" />
+            </LinearLayout>
+        </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="?android:attr/colorEdgeEffect"
@@ -43,12 +93,13 @@
             android:layout_margin="8dp"
             android:layout_weight="1"
             android:background="@drawable/rounded_corner"
-            android:minHeight="48dp"
             android:onClick="onCancel"
             android:text="@string/buttonCancelText"
+            android:textAllCaps="false"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:ignore="VisualLintButtonSize" />
 
         <Space
             android:layout_width="wrap_content"
@@ -67,7 +118,8 @@
             android:textAllCaps="false"
             android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            tools:ignore="VisualLintButtonSize" />
 
     </LinearLayout>
 

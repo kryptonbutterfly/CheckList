@@ -28,35 +28,53 @@ sealed class Action<I>: Serializable {
     }
 }
 
-data class CreateTask(@Expose val description: String, @Expose val index: Int) :
+data class CreateTask(
+    @Expose val description: String,
+    @Expose val category: Long,
+    @Expose val index: Int) :
     Action<DeleteTask>() {
     override fun inverse(): DeleteTask {
-        return DeleteTask(description, index)
+        return DeleteTask(description, category, index)
     }
 }
 
-data class RenameTask(@Expose val old: String, @Expose val new: String, @Expose val index: Int) :
-    Action<RenameTask>() {
-    override fun inverse(): RenameTask {
-        return RenameTask(new, old, index)
+data class ChangeTask(
+    @Expose val descOld: String,
+    @Expose val catOld: Long,
+    @Expose val indOld: Int,
+    @Expose val descNew: String,
+    @Expose val catNew: Long,
+    @Expose val indNew: Int) :
+    Action<ChangeTask>() {
+    override fun inverse(): ChangeTask {
+        return ChangeTask(descNew, catNew, indNew, descOld, catOld, indOld)
     }
 }
 
-data class MoveTask(@Expose val old: Int, @Expose val new: Int, @Expose val description: String) :
+data class MoveTask(
+    @Expose val old: Int,
+    @Expose val new: Int,
+    @Expose val description: String,
+    @Expose val categoryID: Long) :
     Action<MoveTask>() {
     override fun inverse(): MoveTask {
-        return MoveTask(new, old, description)
+        return MoveTask(new, old, description, categoryID)
     }
 }
 
-data class DeleteTask(@Expose val description: String, @Expose val index: Int) :
+data class DeleteTask(
+    @Expose val description: String,
+    @Expose val category: Long,
+    @Expose val index: Int) :
     Action<CreateTask>() {
     override fun inverse(): CreateTask {
-        return CreateTask(description, index)
+        return CreateTask(description, category, index)
     }
 }
 
-data class DeleteAll(@Expose val count: Int) : Action<Unit>() {
+data class DeleteAll(
+    @Expose val count: Int) :
+    Action<Unit>() {
     override fun inverse() {}
 }
 

@@ -9,5 +9,8 @@
 .cxx
 local.properties
 *.apk
-/gradle/wrapper/gradle-wrapper.jar
 /app/release/
+gradle/wrapper
+gradlew
+gradlew.bat
+gradle.properties

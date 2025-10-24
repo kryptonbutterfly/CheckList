@@ -8,7 +8,7 @@ import java.io.Serializable
 
 private const val SETTINGS_FILE: String = "Settings.json"
 
-fun loadSettings(context: ContextWrapper):Settings {
+private fun loadSettings(context: ContextWrapper):Settings {
     val file = File(context.filesDir, SETTINGS_FILE)
     if (!file.exists())
         return Settings()
@@ -16,12 +16,17 @@ fun loadSettings(context: ContextWrapper):Settings {
     return GSON.fromJson(json, Settings::class.java)
 }
 
-fun saveSettings(context: ContextWrapper, settings: Settings) {
+fun saveSettings(context: ContextWrapper) {
     val json = GSON.toJson(settings)
     val file = File(context.filesDir, SETTINGS_FILE)
     if (file.parentFile != null && !file.parentFile!!.exists())
         file.parentFile!!.mkdirs()
     file.bufferedWriter().use { it.write(json) }
+}
+
+private var settings : Settings? = null
+fun settings(context: ContextWrapper): Settings {
+    return settings ?: loadSettings(context).also { settings = it }
 }
 
 data class Settings(
