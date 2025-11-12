@@ -34,6 +34,8 @@ import kryptonbutterfly.checklist.Constants.HTML_POSTFIX
 import kryptonbutterfly.checklist.Constants.HTML_PREFIX
 import kryptonbutterfly.checklist.Constants.INDEX
 import kryptonbutterfly.checklist.Constants.CATEGORY
+import kryptonbutterfly.checklist.Constants.CATEGORY_HEADER_INDEX
+import kryptonbutterfly.checklist.Constants.CATEGORY_TITLE_INDEX
 import kryptonbutterfly.checklist.Constants.CHANGE_TASK
 import kryptonbutterfly.checklist.Constants.MOVE_TASK
 import kryptonbutterfly.checklist.Constants.TASKS_INDEX
@@ -69,6 +71,18 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
             if (result.resultCode == RESULT_OK)
                 history.limit = settings(this).undoLength
         }
+    
+    private val editResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK)
+                (result.data?.getSerializableExtra(CATEGORY) as? Category)?.also { cat ->
+                    data(this).categories[cat.id] = cat
+                    val categories = findViewById<LinearLayout>(R.id.categories)
+                    (((categories.children.firstOrNull { cat.id == it.tag } as? LinearLayout)?.
+                        getChildAt(CATEGORY_HEADER_INDEX) as? LinearLayout)?.
+                        getChildAt(CATEGORY_TITLE_INDEX) as? TextView)?.text = cat.name
+                }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,18 +111,6 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         super.onPause()
     
         saveSettings(this)
-
-        /*
-        val taskList = findViewById<TableLayout>(R.id.taskList)
-        val data = Data()
-        
-        val uncategorized = ArrayList<String>()
-        data.tasks.put(null, uncategorized)
-        taskList.forEach {
-            uncategorized.add(((it as TableRow)[TEXT_COLUMN] as TextView).text.toString())
-        }
-         */
-        
         val data = data(this)
         data.history = this.history.backingList
         saveData(this)
@@ -263,6 +265,11 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         categoryView.layoutParams = vertLayout
         categoryView.orientation = LinearLayout.VERTICAL
         categoryView.tag = categoryId
+        categoryView.setOnClickListener { view ->
+            val intent = Intent(this, EditCategory::class.java)
+            intent.putExtra(CATEGORY, categoryId)
+            editResult.launch(intent)
+        }
         
         val categoryTitle = LinearLayout(applicationContext)
         categoryView.addView(categoryTitle)

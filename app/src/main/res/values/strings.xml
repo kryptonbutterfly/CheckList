@@ -29,4 +29,5 @@
     <string name="categoryIconDescription">category icon</string>
     <string name="categoriesTitle">Categories</string>
     <string name="pruneButtonText">cleanup</string>
+    <string name="title_activity_edit_category">EditCategory</string>
 </resources>
