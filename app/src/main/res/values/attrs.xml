@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="switch_track_tint_on" format="color"/>
+    <attr name="switch_track_tint_off" format="color"/>
+    <attr name="switch_thumb_tint_on" format="color"/>
+    <attr name="switch_thumb_tint_off" format="color"/>
+    <attr name="row_odd_color" format="color"/>
+    <attr name="row_even_color" format="color"/>
+    <attr name="buttonBgColor" format="color"/>
+    <attr name="icon_border_color" format="color"/>
+</resources>

@@ -2,16 +2,16 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/background_dark"
     tools:context="kryptonbutterfly.checklist.MainActivity">
 
     <LinearLayout
         android:id="@+id/menu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/colorEdgeEffect"
+        android:background="?attr/backgroundColor"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -52,7 +52,8 @@
             android:onClick="onRestoreClick"
             android:padding="4dp"
             android:visibility="invisible"
-            app:srcCompat="@android:drawable/ic_menu_revert" />
+            app:srcCompat="@android:drawable/ic_menu_revert"
+            tools:visibility="visible" />
 
         <ImageButton
             android:id="@+id/addButton"
@@ -81,68 +82,151 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="SpeakableTextPresentCheck">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraintLayout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?android:attr/colorEdgeEffect"
-                app:layout_constraintBottom_toTopOf="@id/taskList"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:layout_height="wrap_content">
 
-                <ImageView
-                    android:id="@+id/exportButton"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_margin="8dp"
-                    android:contentDescription="@string/export"
-                    android:onClick="onExportClick"
-                    android:padding="10dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/settingsButton"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@android:drawable/ic_menu_save" />
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraintLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/backgroundColor"
+                    android:padding="8dp"
+                    app:layout_constraintBottom_toTopOf="@id/taskList"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <ImageButton
-                    android:id="@+id/settingsButton"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_margin="8dp"
-                    android:backgroundTint="@android:color/transparent"
-                    android:contentDescription="@string/settings"
-                    android:onClick="onSettingsClick"
+                    <ImageButton
+                        android:id="@+id/settingsButton"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:backgroundTint="@android:color/transparent"
+                        android:contentDescription="@string/settings"
+                        android:onClick="onDropDownClick"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/settings_dots" />
+
+                    <Spinner
+                        android:id="@+id/spinnerList"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_marginEnd="8dp"
+                        android:padding="12dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/settingsButton"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TableLayout
+                    android:id="@+id/taskList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+
+                </TableLayout>
+
+                <LinearLayout
+                    android:id="@+id/categories"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/settings_dots" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/taskList"></LinearLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <TableLayout
-                android:id="@+id/taskList"
-                android:layout_width="match_parent"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/dropdown"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+                android:layout_gravity="top|end"
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginVertical="50dp"
+                android:background="?attr/backgroundColor"
+                android:focusableInTouchMode="true"
+                android:focusedByDefault="true"
+                android:nextFocusUp="@id/buttonAddList"
+                android:nextFocusDown="@id/buttonSettings"
+                android:visibility="gone"
+                app:cardCornerRadius="8dp"
+                app:cardUseCompatPadding="true"
+                tools:visibility="visible">
 
-            </TableLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/categories"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/taskList"
-                app:layout_constraintBottom_toBottomOf="parent">
-            </LinearLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                    <TextView
+                        android:id="@+id/buttonSettings"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@android:color/transparent"
+                        android:drawableStart="@android:drawable/ic_menu_preferences"
+                        android:drawablePadding="16dp"
+                        android:gravity="start|center_vertical"
+                        android:onClick="onSettingsClick"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="12dp"
+                        android:text="@string/title_settings_button"
+                        android:textAllCaps="false"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/buttonAddList"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:drawableStart="@android:drawable/ic_menu_save"
+                        android:drawablePadding="16dp"
+                        android:gravity="start|center_vertical"
+                        android:onClick="onExportClick"
+                        android:paddingVertical="12dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="24dp"
+                        android:text="@string/button_export_md"
+                        android:textAllCaps="false"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="16sp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_weight="0"
+                        android:background="?android:attr/listDivider" />
+
+                    <TextView
+                        android:id="@+id/buttonExport"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:drawableStart="@android:drawable/ic_menu_add"
+                        android:drawablePadding="16dp"
+                        android:gravity="start|center_vertical"
+                        android:onClick="onAddListClick"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="12dp"
+                        android:text="@string/button_add_list"
+                        android:textAllCaps="false"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </FrameLayout>
     </ScrollView>
 
     <LinearLayout
@@ -150,10 +234,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/menu"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -164,7 +249,7 @@
                 android:id="@+id/categoryTemplateIcon"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:importantForAccessibility="no"/>
+                android:importantForAccessibility="no" />
 
             <TextView
                 android:id="@+id/categoryTemplateName"
@@ -172,12 +257,14 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_margin="12dp"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="16sp" />
         </LinearLayout>
+
         <TableLayout
             android:id="@+id/categoryTemplateTasks"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
     <TableRow
@@ -194,7 +281,7 @@
             android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:textColor="@android:color/primary_text_dark" />
+            android:textColor="?android:attr/textColorPrimary" />
     </TableRow>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

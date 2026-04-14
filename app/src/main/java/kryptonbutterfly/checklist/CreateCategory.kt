@@ -5,15 +5,15 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import kryptonbutterfly.checklist.Constants.CATEGORY
 import kryptonbutterfly.checklist.persistence.Category
 import kryptonbutterfly.checklist.persistence.cache
 import kryptonbutterfly.checklist.persistence.data
 
-class CreateCategory : AppCompatActivity() {
+class CreateCategory : ComponentActivity() {
 	private var iconName : String? = null
 	private val pickImage = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
 			uri?.let {

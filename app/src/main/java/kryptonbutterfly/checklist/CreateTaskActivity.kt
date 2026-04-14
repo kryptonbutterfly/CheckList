@@ -6,8 +6,8 @@ import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Spinner
+import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import kryptonbutterfly.checklist.Constants.ACTION
 import kryptonbutterfly.checklist.Constants.CATEGORY
@@ -26,7 +26,7 @@ import kryptonbutterfly.checklist.ui.SpinnerIconItem
 
 
 private var lastCategoryId: Long = UNCATEGORIZED
-class CreateTaskActivity : AppCompatActivity() {
+class CreateTaskActivity : ComponentActivity() {
     private var description: String? = null
     private var categoryId: Long = UNCATEGORIZED
     private var index: Int = -1
@@ -90,16 +90,16 @@ class CreateTaskActivity : AppCompatActivity() {
             val descOld = description as String
             if (catNew == categoryId) {
                 lastCategoryId = catNew
-                result.putExtra(ACTION, ChangeTask(descOld, categoryId, index, text, catNew, index))
+                result.putExtra(ACTION, ChangeTask(descOld, categoryId, index, text, catNew, index, data.currentList))
                 setResult(RESULT_OK, result)
                 finish()
                 return
             } else {
-                val indNew = data.tasks[catNew]?.size ?: 0
+                val indNew = data.currentList().tasks[catNew]?.size ?: 0
                 lastCategoryId = catNew
                 result.putExtra(
                     ACTION,
-                    ChangeTask(descOld, categoryId, index, text, catNew, indNew)
+                    ChangeTask(descOld, categoryId, index, text, catNew, indNew, data.currentList)
                 )
                 setResult(RESULT_OK, result)
                 finish()
@@ -107,7 +107,7 @@ class CreateTaskActivity : AppCompatActivity() {
             }
         }  else {
             lastCategoryId = catNew
-            result.putExtra(ACTION, CreateTask(text, catNew, index))
+            result.putExtra(ACTION, CreateTask(text, data.currentList, catNew, index))
             setResult(RESULT_OK, result)
             finish()
             return

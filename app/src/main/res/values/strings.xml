@@ -30,4 +30,9 @@
     <string name="categoriesTitle">Categories</string>
     <string name="pruneButtonText">cleanup</string>
     <string name="title_activity_edit_category">EditCategory</string>
+    <string name="title_settings_button">Settings</string>
+    <string name="button_add_list">Add List</string>
+    <string name="button_export_md">Export .md</string>
+    <string name="text_input_hint_ListName">List name</string>
+    <string name="title_activity_edit_checklist">EditCheckList</string>
 </resources>

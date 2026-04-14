@@ -3,13 +3,16 @@ package kryptonbutterfly.checklist
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.text.Html
 import android.text.SpannableString
 import android.util.Log
+import android.util.TypedValue
 import android.view.Gravity.CENTER_VERTICAL
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
@@ -19,12 +22,14 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.core.view.isEmpty
+import androidx.core.view.isVisible
 import androidx.core.view.setMargins
 import androidx.core.view.size
 import kryptonbutterfly.checklist.Constants.ACTION
@@ -49,10 +54,16 @@ import kotlin.sequences.filter
 
 const val REQUEST_PERMISSION_CODE = 0
 class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
-    private var light: Int = 0
-    private var dark: Int = 0
+    private val rowOddColor = TypedValue()
+    private val rowEvenColor = TypedValue()
+
+    private lateinit var dropDown: CardView
+    private lateinit var spinnerList: Spinner
+    private lateinit var listsAdapter: ArrayAdapter<String>
+    
     private val roundedCorners = Drawable.createFromPath("@drawable/rounded_corner")
     private val history = Stack<Action<*>>()
+    
     private val getContent =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK)
@@ -83,28 +94,89 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
                         getChildAt(CATEGORY_TITLE_INDEX) as? TextView)?.text = cat.name
                 }
         }
+    
+    private val addListResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                clearUI()
+                populateUI()
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        this.light = ContextCompat.getColor(this, R.color.light)
-        this.dark = ContextCompat.getColor(this, R.color.dark)
+        
+        theme.resolveAttribute(R.attr.row_even_color, rowEvenColor, true)
+        theme.resolveAttribute(R.attr.row_odd_color, rowOddColor, true)
+        
+        this.dropDown = findViewById(R.id.dropdown)
+        this.spinnerList = findViewById(R.id.spinnerList)
+        
+        this.listsAdapter = ArrayAdapter(this, android.R.layout.simple_selectable_list_item, ArrayList())
+        spinnerList.adapter = this.listsAdapter
+        spinnerList.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(adapter: AdapterView<*>?, view: View?, index: Int, p3: Long ) {
+                listsAdapter.getItem(index)?. also {
+                    val data = data(this@MainActivity)
+                    if (data.currentList != it) {
+                        data.currentList = it
+                        clearUI()
+                        populateUI()
+                    }
+                }
+            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+    }
+    
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        if (this::dropDown.isInitialized && this.dropDown.isVisible)
+            ev?.takeIf { it.action == MotionEvent.ACTION_UP } ?.also {
+                val loc = IntArray(2)
+                dropDown.getLocationOnScreen(loc)
+                val rect =
+                    Rect(loc[0], loc[1], loc[0] + dropDown.width, loc[1] + dropDown.height)
+                val x = it.rawX.toInt()
+                val y = it.rawY.toInt()
+                if (!rect.contains(x, y)) {
+                    this.dropDown.visibility = GONE
+                    return true
+                }
+            }
+        return super.dispatchTouchEvent(ev)
     }
 
     override fun onResume() {
         super.onResume()
+        populateUI()
+    }
+    
+    private fun populateUI() {
         if (findViewById<TableLayout>(R.id.taskList).size != 0)
             return
         if (findViewById<LinearLayout>(R.id.categories).size != 0)
             return
-
+        
         history.limit = settings(this).undoLength
-
+        
         val data = data(this)
-        data.tasks.forEach { cat, tasks -> this.createTasks(cat, tasks, data) }
-        history.backingList = data.history
+        
+        val currList = data.currentList()
+        listsAdapter.clear()
+        listsAdapter.addAll(data.lists.keys)
+        val index = listsAdapter.getPosition(data.currentList)
+        spinnerList.setSelection(index)
+        
+        currList.tasks.forEach { cat, tasks -> this.createTasks(cat, tasks, data) }
+        history.backingList = data.currentList().history
         
         updateUI()
+    }
+    
+    private fun clearUI() {
+        findViewById<TableLayout>(R.id.taskList).removeAllViews()
+        findViewById<LinearLayout>(R.id.categories).removeAllViews()
     }
 
     override fun onPause() {
@@ -112,11 +184,12 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     
         saveSettings(this)
         val data = data(this)
-        data.history = this.history.backingList
+        data.currentList().history = this.history.backingList
         saveData(this)
     }
 
     fun onExportClick(@Suppress("UNUSED_PARAMETER") view: View) {
+        dropDown.visibility = GONE
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED)
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_PERMISSION_CODE)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED)
@@ -125,8 +198,19 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 
 
     fun onSettingsClick(@Suppress("UNUSED_PARAMETER") view: View) {
+        dropDown.visibility = GONE
         val intent = Intent(this, SettingsActivity::class.java)
         settingsResult.launch(intent)
+    }
+    
+    fun onAddListClick(@Suppress("UNUSED_PARAMETER") view: View) {
+        dropDown.visibility = GONE
+        addListResult.launch(Intent(this, EditListActivity::class.java))
+        
+    }
+    
+    fun onDropDownClick(@Suppress("UNUSED_PARAMETER") view: View) {
+        dropDown.visibility = VISIBLE
     }
 
     fun onAddClick(@Suppress("UNUSED_PARAMETER") view: View) {
@@ -141,12 +225,9 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     }
 
     private fun taskCount(): Int {
-        return data(this).tasks.values.stream()
-            .mapToInt { tasks ->
-                val count = tasks.size
-                tasks.clear()
-                count
-            }.sum()
+        return data(this).currentList().tasks.values.stream()
+            .mapToInt { tasks -> tasks.size }
+            .sum()
     }
     
     override fun onDialogPositiveClick() {
@@ -159,7 +240,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         categories.removeAllViews()
         
         event(DeleteAll(taskCount))
-        data(this).tasks.clear()
+        data(this).currentList().tasks.clear()
     }
 
     fun onRestoreClick(@Suppress("UNUSED_PARAMETER") view: View) {
@@ -184,7 +265,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "text/markdown"
-        intent.putExtra(Intent.EXTRA_TITLE, "tasks.md")
+        intent.putExtra(Intent.EXTRA_TITLE, "${data(this).currentList}.md")
         getExport.launch(intent)
     }
 
@@ -194,18 +275,20 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         
         fun printTask(tasks: ArrayList<String>) {
             tasks.forEach { desc ->
-                val html = Html.toHtml(SpannableString(desc), Html.FROM_HTML_MODE_LEGACY)
-                val markdown = html.substring(HTML_PREFIX.length, html.length - HTML_POSTFIX.length)
-                sb.append(" * ").append(markdown).append('\n')
+                tasks.forEach { sb.append(" * ${it}\n")}
             }
         }
         
-        data.tasks[UNCATEGORIZED]?.also(::printTask)
+        sb.append("# ${data.currentList}\n")
         
-        data.tasks.forEach { catId, tasks ->
-            data.categories[catId]?.also { category ->
-                sb.append("## ").append(category.name).append('\n')
-                printTask(tasks)
+        val list = data.currentList()
+        list.tasks[UNCATEGORIZED]?.also(::printTask)
+        
+        list.tasks.forEach { catId, tasks ->
+            if (tasks.isNotEmpty())
+                data.categories[catId]?.also { category ->
+                    sb.append("## ${category.name}\n")
+                    printTask(tasks)
             }
         }
         
@@ -224,7 +307,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
                 return
             }
             ((tasksNew[action.indNew] as TableRow)[TEXT_COLUMN] as TextView).text = action.descNew
-            data(this).tasks[action.catNew]?.
+            data(this).currentList().tasks[action.catNew]?.
                 also { tasks -> tasks[action.indNew] = action.descNew }
         } else {
             val tasksOld = getOrCreateCategory(action.catOld)
@@ -236,8 +319,8 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
                 Log.e(CHANGE_TASK, "Expected indNew to be -1 or be in range [0, ${tasksNew.childCount + 1}) but was ${action.indNew}")
                 return
             }
-            deleteTask(DeleteTask(action.descOld, action.catOld, action.indOld))
-            createTask(CreateTask(action.descNew, action.catNew, action.indNew))
+            deleteTask(DeleteTask(action.descOld, action.listName,action.catOld, action.indOld))
+            createTask(CreateTask(action.descNew, action.listName,action.catNew, action.indNew))
         }
     }
     
@@ -312,7 +395,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
             Log.i(CREATE_TASK, "Creating Category '${category.name}' and it's tasks.")
         else
             Log.i(CREATE_TASK, "Creating uncategorized tasks.")
-        tasks.forEach { description -> createTask(CreateTask(description, categoryId,-1), true) }
+        tasks.forEach { description -> createTask(CreateTask(description, data.currentList, categoryId,-1), true) }
     }
     
     private fun createTask(action: CreateTask, isInit : Boolean = false) {
@@ -320,7 +403,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         Log.i(CREATE_TASK, "Adding task @ ${action.index}")
         
         if (!isInit)
-            data(this).addTask(action.category, action.description, action.index)
+            data(this).addTask(action.listName,action.category, action.description, action.index)
         
         val i = if (action.index == -1) tasks.size else action.index.coerceIn(0, tasks.size)
 
@@ -350,7 +433,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         deleteButton.setImageResource(android.R.drawable.ic_menu_delete)
         deleteButton.background = roundedCorners
         deleteButton.setOnClickListener {
-            event(DeleteTask(textView.text.toString(), action.category,tasks.indexOfChild(row)))
+            event(DeleteTask(textView.text.toString(), action.listName, action.category,tasks.indexOfChild(row)))
         }
 
         val moveView = LinearLayout(applicationContext)
@@ -390,8 +473,9 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         val new = index - 1
         val previous = taskList[new] as TableRow
         val prevText = previous[TEXT_COLUMN] as TextView
-        data(this).tasks[categoryId]?.swap(new, index)
-        event(MoveTask(index, new, prevText.text.toString(), categoryId))
+        val data = data(this)
+        data.currentList().tasks[categoryId]?.swap(new, index)
+        event(MoveTask(index, new, prevText.text.toString(), categoryId, data.currentList))
     }
 
     private fun moveDown(taskList: TableLayout, row: TableRow, categoryId: Long) {
@@ -402,11 +486,11 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 
         val next = taskList[new] as TableRow
         val nextText = next[TEXT_COLUMN] as TextView
-        event(MoveTask(index, new, nextText.text.toString(), categoryId))
+        event(MoveTask(index, new, nextText.text.toString(), categoryId, data(this).currentList))
     }
 
     private fun deleteTask(action: DeleteTask) {
-        data(this).tasks[action.category]?.removeAt(action.index)
+        data(this).currentList().tasks[action.category]?.removeAt(action.index)
         getOrCreateCategory(action.category)
             .removeViewAt(action.index)
     }
@@ -485,7 +569,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     private fun updateUI() {
         fun colorRows(tasks: TableLayout) {
             for (i in 0 until tasks.size)
-                (tasks[i] as TableRow).setBackgroundColor(if (i % 2 == 1) dark else light)
+                (tasks[i] as TableRow).setBackgroundColor((if (i % 2 == 1) rowOddColor else rowEvenColor).data)
         }
         
         val taskList = findViewById<TableLayout>(R.id.taskList)

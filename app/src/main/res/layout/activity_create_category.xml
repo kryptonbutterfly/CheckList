@@ -4,14 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/background_dark"
     tools:context="kryptonbutterfly.checklist.CreateCategory">
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/categoryInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/colorEdgeEffect"
         app:hintEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,6 +22,7 @@
             android:hint="@string/HintCategoryName"
             android:inputType="textAutoCorrect|textMultiLine"
             android:minHeight="48dp"
+            android:paddingHorizontal="12dp"
             tools:ignore="VisualLintTextFieldSize" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -59,7 +58,6 @@
             android:layout_weight="1" />
 
         <Button
-            android:id="@+id/button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0"
@@ -75,14 +73,13 @@
         android:id="@+id/linearLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?android:attr/colorEdgeEffect"
+        android:background="?attr/backgroundColor"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
-            android:id="@+id/cancelBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
@@ -91,7 +88,6 @@
             android:onClick="onCancel"
             android:text="@string/buttonCancelText"
             android:textAllCaps="false"
-            android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp"
             android:textStyle="bold"
             tools:ignore="VisualLintButtonSize" />
@@ -102,7 +98,6 @@
             android:layout_weight="3" />
 
         <Button
-            android:id="@+id/acceptBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
@@ -111,7 +106,6 @@
             android:onClick="onApply"
             android:text="@string/buttonAcceptText"
             android:textAllCaps="false"
-            android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp"
             android:textStyle="bold"
             tools:ignore="VisualLintButtonSize" />
