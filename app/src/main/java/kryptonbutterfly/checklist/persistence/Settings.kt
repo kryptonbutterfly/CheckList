@@ -34,4 +34,5 @@ data class Settings(
     @Expose var trackCreate: Boolean = false,
     @Expose var trackRename: Boolean = true,
     @Expose var trackMove: Boolean = false,
-    @Expose var trackDelete: Boolean = true): Serializable
+    @Expose var trackDelete: Boolean = true,
+    @Expose var skipExistingTasks: Boolean = false): Serializable

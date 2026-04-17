@@ -1,6 +1,6 @@
 package kryptonbutterfly.checklist.persistence
 
-import android.content.ContextWrapper
+import android.content.Context
 import android.util.Log
 import com.google.gson.annotations.Expose
 import kryptonbutterfly.checklist.Constants.GSON
@@ -11,7 +11,7 @@ import java.util.*
 
 private const val TASKS_LIST_FILE: String = "TasksListData.json"
 
-private fun loadData(context: ContextWrapper): Data {
+private fun loadData(context: Context): Data {
     val file = File(context.filesDir, TASKS_LIST_FILE)
     if (!file.exists())
         return Data()
@@ -19,7 +19,7 @@ private fun loadData(context: ContextWrapper): Data {
     return GSON.fromJson(json, Data::class.java)
 }
 
-fun saveData(context: ContextWrapper) {
+fun saveData(context: Context) {
     data?.also {data ->
         data.pruneLists()
         val json = GSON.toJson(data)
@@ -31,7 +31,7 @@ fun saveData(context: ContextWrapper) {
 }
 
 private var data : Data? = null
-fun data(context: ContextWrapper): Data {
+fun data(context: Context): Data {
     return data ?: loadData(context).also { data = it }
 }
 

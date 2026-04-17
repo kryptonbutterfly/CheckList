@@ -76,6 +76,13 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
             if (result.resultCode == RESULT_OK)
                 result.data?.data?.also(this::exportData)
         }
+    
+    private val getImport =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                result.data?.data?.also(this::importData)
+            }
+        }
 
     private val settingsResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -190,10 +197,16 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 
     fun onExportClick(@Suppress("UNUSED_PARAMETER") view: View) {
         dropDown.visibility = GONE
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED)
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_PERMISSION_CODE)
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED)
-            openFilePicker()
+        openFilePicker()
+    }
+    
+    fun onImportClick(@Suppress("UNUSED_PARAMETER") view: View) {
+        dropDown.visibility = GONE
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "text/markdown"
+//        intent.putExtra(Intent.EXTRA_TITLE, "${data(this).currentList}.md")
+        getImport.launch(intent)
     }
 
 
@@ -269,6 +282,38 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         getExport.launch(intent)
     }
 
+    private fun importData(uri: Uri) {
+        val settings = settings(this)
+        import(this, uri)?.also { importData ->
+            val data = data(this)
+            data.lists[importData.listName ?: data.currentList]?.also { targetList ->
+                importData.tasks.forEach { catName, iTasks ->
+                    fun skipTask(catId: Long, iTask: String): Boolean {
+                        return settings.skipExistingTasks &&
+                        targetList.tasks[catId]?.contains(iTask)?:false
+                    }
+                    
+                    data.categories.values.firstOrNull { it.name == catName }?.also { cat ->
+                        iTasks.filter { taskName -> !skipTask(cat.id, taskName) }
+                            .forEach { targetList.addTask(cat.id, it, -1) }
+                    } ?: run {
+                            val cat = Category(data, catName, null)
+                            val catId: Long
+                            if (catName.isNotBlank()) {
+                                data.categories.put(cat.id, cat)
+                                catId = cat.id
+                            } else
+                                catId = UNCATEGORIZED
+                            iTasks.filter { taskName -> !skipTask(catId, taskName) }
+                                .forEach { targetList.addTask(catId, it, -1) }
+                    }
+                }
+                clearUI()
+                populateUI()
+            }
+        }
+    }
+    
     private fun exportData(uri: Uri) {
         val data = data(this)
         val sb = StringBuilder()

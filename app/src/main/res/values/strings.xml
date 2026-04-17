@@ -35,4 +35,7 @@
     <string name="button_export_md">Export .md</string>
     <string name="text_input_hint_ListName">List name</string>
     <string name="title_activity_edit_checklist">EditCheckList</string>
+    <string name="button_import_md">Import .md</string>
+    <string name="importTitle">Import</string>
+    <string name="switchTrackSkipTitle">skip duplicate Tasks</string>
 </resources>

@@ -12,21 +12,36 @@ import kryptonbutterfly.checklist.persistence.data
 import kryptonbutterfly.checklist.persistence.settings
 
 class SettingsActivity : ComponentActivity() {
+    private lateinit var spinnerMaxUndo: NumberPicker
+    private lateinit var switchTrackCreate: SwitchCompat
+    private lateinit var switchTrackRename: SwitchCompat
+    private lateinit var switchTrackMove: SwitchCompat
+    private lateinit var switchTrackDelete: SwitchCompat
+    private lateinit var switchSkipDuplicates: SwitchCompat
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+        
+        spinnerMaxUndo = findViewById(R.id.spinnerMaxUndoSize)
+        switchTrackCreate = findViewById(R.id.switchTrackCreate)
+        switchTrackRename = findViewById(R.id.switchTrackRename)
+        switchTrackMove = findViewById(R.id.switchTrackMove)
+        switchTrackDelete = findViewById(R.id.switchTrackDelete)
+        switchSkipDuplicates = findViewById(R.id.switchSkipDuplicates)
     
         val settings = settings(this)
         
-        val undoMaxSizeSpinner = findViewById<NumberPicker>(R.id.spinnerMaxUndoSize)
-        undoMaxSizeSpinner.minValue = 0
-        undoMaxSizeSpinner.maxValue = 0x40
-        undoMaxSizeSpinner.value = settings.undoLength
+        spinnerMaxUndo.minValue = 0
+        spinnerMaxUndo.maxValue = 0x40
+        spinnerMaxUndo.value = settings.undoLength
 
-        findViewById<SwitchCompat>(R.id.switchTrackCreate).isChecked = settings.trackCreate
-        findViewById<SwitchCompat>(R.id.switchTrackRename).isChecked = settings.trackRename
-        findViewById<SwitchCompat>(R.id.switchTrackMove).isChecked = settings.trackMove
-        findViewById<SwitchCompat>(R.id.switchTrackDelete).isChecked = settings.trackDelete
+        
+        switchTrackCreate.isChecked = settings.trackCreate
+        switchTrackRename.isChecked = settings.trackRename
+        switchTrackMove.isChecked = settings.trackMove
+        switchTrackDelete.isChecked = settings.trackDelete
+        switchSkipDuplicates.isChecked = settings.skipExistingTasks
 
         onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true){
             override fun handleOnBackPressed() {
@@ -38,11 +53,12 @@ class SettingsActivity : ComponentActivity() {
 
     private fun persist() {
         val settings = settings(this)
-        settings.undoLength = findViewById<NumberPicker>(R.id.spinnerMaxUndoSize).value
-        settings.trackCreate = findViewById<SwitchCompat>(R.id.switchTrackCreate).isChecked
-        settings.trackRename = findViewById<SwitchCompat>(R.id.switchTrackRename).isChecked
-        settings.trackMove = findViewById<SwitchCompat>(R.id.switchTrackMove).isChecked
-        settings.trackDelete = findViewById<SwitchCompat>(R.id.switchTrackDelete).isChecked
+        settings.undoLength = spinnerMaxUndo.value
+        settings.trackCreate = switchTrackCreate.isChecked
+        settings.trackRename = switchTrackRename.isChecked
+        settings.trackMove = switchTrackMove.isChecked
+        settings.trackDelete = switchTrackDelete.isChecked
+        settings.skipExistingTasks = switchSkipDuplicates.isChecked
 
         val result = Intent()
         setResult(RESULT_OK, result)
