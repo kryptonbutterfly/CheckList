@@ -274,9 +274,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         val sb = StringBuilder()
         
         fun printTask(tasks: ArrayList<String>) {
-            tasks.forEach { desc ->
-                tasks.forEach { sb.append(" * ${it}\n")}
-            }
+            tasks.forEach { sb.append(" * ${it}\n")}
         }
         
         sb.append("# ${data.currentList}\n")

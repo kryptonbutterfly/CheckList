@@ -8,4 +8,5 @@
     <attr name="row_even_color" format="color"/>
     <attr name="buttonBgColor" format="color"/>
     <attr name="icon_border_color" format="color"/>
+    <attr name="icon_color" format="color"/>
 </resources>

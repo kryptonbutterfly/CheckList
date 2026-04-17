@@ -22,6 +22,7 @@
         <item name="row_even_color">@color/even_dark</item>
 
         <item name="icon_border_color">@color/Gray10</item>
+        <item name="icon_color">@color/Gray70</item>
 
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
