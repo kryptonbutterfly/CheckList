@@ -46,11 +46,11 @@ data class Data(
     }
     
     fun currentList() : CheckList {
-        return lists.getOrPut(currentList) { CheckList() }
+        return lists.getOrPut(currentList, ::CheckList)
     }
     
     fun addTask(listName: String, categoryId: Long, description: String, index: Int) {
-        val list = lists.getOrPut(listName) { CheckList() }
+        val list = lists.getOrPut(listName, ::CheckList)
         list.addTask(categoryId, description, index)
     }
     

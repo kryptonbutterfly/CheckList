@@ -1,6 +1,7 @@
 package kryptonbutterfly.checklist.persistence
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 
 data class Import(
@@ -16,6 +17,7 @@ data class Import(
 private val ENTRY_START: Regex = Regex("\n\\s*(##|\\*)")
 
 fun import(context: Context, uri: Uri): Import? {
+	context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
 	context.contentResolver.openInputStream(uri)?.use { iStream ->
 		iStream.reader(Charsets.UTF_8).use {
 			var lines = it.readText()

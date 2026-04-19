@@ -9,10 +9,10 @@ android {
 	
 	defaultConfig {
 		applicationId = "kryptonbutterfly.checklist"
-		minSdk = 31
+		minSdk = 29
 		targetSdk = 36
-		versionCode = 11
-		versionName = "4.1.0"
+		versionCode = 12
+		versionName = "4.1.1"
 	}
 	
 	buildTypes {

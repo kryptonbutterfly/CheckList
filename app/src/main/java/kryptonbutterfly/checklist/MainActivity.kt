@@ -1,14 +1,11 @@
 package kryptonbutterfly.checklist
 
-import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
-import android.text.Html
-import android.text.SpannableString
 import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity.CENTER_VERTICAL
@@ -23,8 +20,6 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.get
@@ -35,8 +30,6 @@ import androidx.core.view.size
 import kryptonbutterfly.checklist.Constants.ACTION
 import kryptonbutterfly.checklist.Constants.CREATE_TASK
 import kryptonbutterfly.checklist.Constants.DESCRIPTION
-import kryptonbutterfly.checklist.Constants.HTML_POSTFIX
-import kryptonbutterfly.checklist.Constants.HTML_PREFIX
 import kryptonbutterfly.checklist.Constants.INDEX
 import kryptonbutterfly.checklist.Constants.CATEGORY
 import kryptonbutterfly.checklist.Constants.CATEGORY_HEADER_INDEX
@@ -78,10 +71,8 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         }
     
     private val getImport =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                result.data?.data?.also(this::importData)
-            }
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri->
+            uri?.also(this::importData)
         }
 
     private val settingsResult =
@@ -202,11 +193,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     
     fun onImportClick(@Suppress("UNUSED_PARAMETER") view: View) {
         dropDown.visibility = GONE
-        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.type = "text/markdown"
-//        intent.putExtra(Intent.EXTRA_TITLE, "${data(this).currentList}.md")
-        getImport.launch(intent)
+        getImport.launch(arrayOf("text/markdown"))
     }
 
 
@@ -286,31 +273,36 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         val settings = settings(this)
         import(this, uri)?.also { importData ->
             val data = data(this)
-            data.lists[importData.listName ?: data.currentList]?.also { targetList ->
-                importData.tasks.forEach { catName, iTasks ->
-                    fun skipTask(catId: Long, iTask: String): Boolean {
-                        return settings.skipExistingTasks &&
+            val targetList = data.lists.getOrPut(importData.listName ?: data.currentList, ::CheckList)
+            
+            fun skipTask(catId: Long, iTask: String): Boolean {
+                return settings.skipExistingTasks &&
                         targetList.tasks[catId]?.contains(iTask)?:false
-                    }
-                    
-                    data.categories.values.firstOrNull { it.name == catName }?.also { cat ->
-                        iTasks.filter { taskName -> !skipTask(cat.id, taskName) }
-                            .forEach { targetList.addTask(cat.id, it, -1) }
-                    } ?: run {
-                            val cat = Category(data, catName, null)
-                            val catId: Long
-                            if (catName.isNotBlank()) {
-                                data.categories.put(cat.id, cat)
-                                catId = cat.id
-                            } else
-                                catId = UNCATEGORIZED
-                            iTasks.filter { taskName -> !skipTask(catId, taskName) }
-                                .forEach { targetList.addTask(catId, it, -1) }
-                    }
-                }
-                clearUI()
-                populateUI()
             }
+            
+            importData.tasks.forEach { catName, iTasks ->
+                data.categories.values.firstOrNull { it.name == catName }?.also { cat ->
+                    iTasks.filter { taskName -> !skipTask(cat.id, taskName) }
+                        .forEach { targetList.addTask(cat.id, it, -1) }
+                } ?: run {
+                        val cat = Category(data, catName, null)
+                        val catId: Long
+                        if (catName.isNotBlank()) {
+                            data.categories.put(cat.id, cat)
+                            catId = cat.id
+                        } else
+                            catId = UNCATEGORIZED
+                        iTasks.filter { taskName -> !skipTask(catId, taskName) }
+                            .forEach { targetList.addTask(catId, it, -1) }
+                }
+            }
+            if (importData.tasks.isNotEmpty()) {
+                targetList.history.clear()
+                history.clear()
+            }
+            
+            clearUI()
+            populateUI()
         }
     }
     
@@ -422,7 +414,8 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         catText.layoutParams = catTextLayout
         catTextLayout.gravity = CENTER_VERTICAL
         catTextLayout.setMargins(12)
-        catText.setTextSize(templateText.textSizeUnit, templateText.textSize)
+        catText.setTextColor(templateText.textColors)
+        catText.setTextSize(TypedValue.COMPLEX_UNIT_SP, templateText.textSize)
         category?.name?.also { catText.text = it }
         
         val tasks = TableLayout(applicationContext)
