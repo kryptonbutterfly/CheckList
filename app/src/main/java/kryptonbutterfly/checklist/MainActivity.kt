@@ -2,7 +2,6 @@ package kryptonbutterfly.checklist
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.graphics.Color.TRANSPARENT
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
@@ -10,10 +9,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
-import android.view.Gravity
-import android.view.Gravity.BOTTOM
 import android.view.Gravity.CENTER_VERTICAL
-import android.view.Gravity.TOP
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
@@ -58,7 +54,6 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     private lateinit var spinnerList: Spinner
     private lateinit var listsAdapter: ArrayAdapter<String>
     
-    private val roundedCorners = Drawable.createFromPath("@drawable/rounded_corner")
     private val history = Stack<Action<*>>()
     
     private val getContent =
