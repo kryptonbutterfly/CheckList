@@ -2,13 +2,18 @@ package kryptonbutterfly.checklist
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.Color.TRANSPARENT
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
+import android.view.Gravity
+import android.view.Gravity.BOTTOM
 import android.view.Gravity.CENTER_VERTICAL
+import android.view.Gravity.TOP
 import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
@@ -49,7 +54,6 @@ const val REQUEST_PERMISSION_CODE = 0
 class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     private val rowOddColor = TypedValue()
     private val rowEvenColor = TypedValue()
-
     private lateinit var dropDown: CardView
     private lateinit var spinnerList: Spinner
     private lateinit var listsAdapter: ArrayAdapter<String>
@@ -383,15 +387,15 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         categoryView.layoutParams = vertLayout
         categoryView.orientation = LinearLayout.VERTICAL
         categoryView.tag = categoryId
-        categoryView.setOnClickListener { view ->
-            val intent = Intent(this, EditCategory::class.java)
-            intent.putExtra(CATEGORY, categoryId)
-            editResult.launch(intent)
-        }
         
         val categoryTitle = LinearLayout(applicationContext)
         categoryView.addView(categoryTitle)
         categoryTitle.layoutParams = vertLayout
+        categoryTitle.setOnClickListener { view ->
+            val intent = Intent(this, EditCategory::class.java)
+            intent.putExtra(CATEGORY, categoryId)
+            editResult.launch(intent)
+        }
         
         val templateIcon = findViewById<ImageView>(R.id.categoryTemplateIcon)
         run {
@@ -455,7 +459,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         textView.layoutParams = taskDescTmpl.layoutParams
         textView.text = action.description
         textView.setTextColor(taskDescTmpl.textColors)
-        textView.setPadding(0,8,0,8)
+        textView.setPadding(0,12,0,12)
         textView.setOnClickListener {
             editTask(tasks.indexOfChild(row), action.category, textView.text.toString())
         }
@@ -467,7 +471,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         deleteButton.layoutParams = deleteLayout
         deleteButton.setPadding(6, 6, 6, 6)
         deleteButton.setImageResource(android.R.drawable.ic_menu_delete)
-        deleteButton.background = roundedCorners
+        deleteButton.setBackgroundColor(TRANSPARENT)
         deleteButton.setOnClickListener {
             event(DeleteTask(textView.text.toString(), action.listName, action.category,tasks.indexOfChild(row)))
         }
@@ -480,16 +484,16 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 
         val buttonUp = ImageButton(applicationContext)
         moveView.addView(buttonUp)
-        buttonUp.layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, MATCH_PARENT, 0.5f)
+        buttonUp.layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, 0.5f)
         buttonUp.setImageResource(android.R.drawable.arrow_up_float)
-        buttonUp.background = roundedCorners
+        buttonUp.setBackgroundColor(TRANSPARENT)
         buttonUp.setOnClickListener { moveUp(tasks, row, action.category) }
 
         val buttonDown = ImageButton(applicationContext)
         moveView.addView(buttonDown)
-        buttonDown.layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, MATCH_PARENT, 0.5f)
+        buttonDown.layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, 0.5f)
         buttonDown.setImageResource(android.R.drawable.arrow_down_float)
-        buttonDown.background = roundedCorners
+        buttonDown.setBackgroundColor(TRANSPARENT)
         buttonDown.setOnClickListener { moveDown(tasks, row, action.category) }
     }
 

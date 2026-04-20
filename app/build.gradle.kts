@@ -11,8 +11,8 @@ android {
 		applicationId = "kryptonbutterfly.checklist"
 		minSdk = 29
 		targetSdk = 36
-		versionCode = 12
-		versionName = "4.1.1"
+		versionCode = 13
+		versionName = "4.1.2"
 	}
 	
 	buildTypes {
