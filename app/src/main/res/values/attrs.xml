@@ -9,4 +9,5 @@
     <attr name="buttonBgColor" format="color"/>
     <attr name="icon_border_color" format="color"/>
     <attr name="icon_color" format="color"/>
+    <attr name="itemGlowColor" format="color"/>
 </resources>

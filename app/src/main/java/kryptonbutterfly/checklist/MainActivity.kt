@@ -2,9 +2,7 @@ package kryptonbutterfly.checklist
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color.TRANSPARENT
 import android.graphics.Rect
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -21,13 +19,16 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.get
-import androidx.core.view.isEmpty
 import androidx.core.view.isVisible
 import androidx.core.view.setMargins
 import androidx.core.view.size
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kryptonbutterfly.checklist.Constants.ACTION
 import kryptonbutterfly.checklist.Constants.CREATE_TASK
 import kryptonbutterfly.checklist.Constants.DESCRIPTION
@@ -38,13 +39,12 @@ import kryptonbutterfly.checklist.Constants.CATEGORY_TITLE_INDEX
 import kryptonbutterfly.checklist.Constants.CHANGE_TASK
 import kryptonbutterfly.checklist.Constants.MOVE_TASK
 import kryptonbutterfly.checklist.Constants.TASKS_INDEX
-import kryptonbutterfly.checklist.Constants.TEXT_COLUMN
 import kryptonbutterfly.checklist.Constants.UNCATEGORIZED
 import kryptonbutterfly.checklist.actions.*
 import kryptonbutterfly.checklist.misc.Stack
-import kryptonbutterfly.checklist.misc.swap
 import kryptonbutterfly.checklist.persistence.*
-import kotlin.sequences.filter
+import kryptonbutterfly.checklist.ui.ItemTouchViewHolder
+import kryptonbutterfly.checklist.ui.TaskAdapter
 
 const val REQUEST_PERMISSION_CODE = 0
 class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
@@ -56,6 +56,39 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     
     private val history = Stack<Action<*>>()
     
+    private val dragHelper = object: ItemTouchHelper.SimpleCallback(
+        ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+        0) {
+        override fun onMove(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            target: RecyclerView.ViewHolder
+        ): Boolean {
+            val from = viewHolder.bindingAdapterPosition
+            val to = target.bindingAdapterPosition
+            (recyclerView.adapter as? TaskAdapter)?.triggerMove(from, to)
+            return true
+        }
+        
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+            //nothing to do here
+        }
+        
+        override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+            super.onSelectedChanged(viewHolder, actionState)
+            if (actionState != ItemTouchHelper.ACTION_STATE_IDLE)
+                (viewHolder as? ItemTouchViewHolder)?.onItemSelected()
+        }
+        
+        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+            super.clearView(recyclerView, viewHolder)
+            (viewHolder as? ItemTouchViewHolder)?.onItemClear()
+        }
+        
+        override fun isItemViewSwipeEnabled() = false
+        
+        override fun isLongPressDragEnabled() = true
+    }
     private val getContent =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK)
@@ -95,7 +128,6 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     private val addListResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
-                clearUI()
                 populateUI()
             }
         }
@@ -118,7 +150,6 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
                     val data = data(this@MainActivity)
                     if (data.currentList != it) {
                         data.currentList = it
-                        clearUI()
                         populateUI()
                     }
                 }
@@ -150,32 +181,30 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     }
     
     private fun populateUI() {
-        if (findViewById<TableLayout>(R.id.taskList).size != 0)
-            return
-        if (findViewById<LinearLayout>(R.id.categories).size != 0)
-            return
-        
+        Log.v("populateUI", "Populating UI")
         history.limit = settings(this).undoLength
         
         val data = data(this)
-        
         val currList = data.currentList()
+        
         listsAdapter.clear()
         listsAdapter.addAll(data.lists.keys)
-        val index = listsAdapter.getPosition(data.currentList)
-        spinnerList.setSelection(index)
+        spinnerList.setSelection(listsAdapter.getPosition(data.currentList))
         
-        currList.tasks.forEach { cat, tasks -> this.createTasks(cat, tasks, data) }
-        history.backingList = data.currentList().history
+        val unspecified = findViewById<RecyclerView>(R.id.taskList)
+        unspecified.adapter = TaskAdapter(
+            this,
+            currList.tasks.getOrPut(UNCATEGORIZED, ::ArrayList),
+            UNCATEGORIZED,
+            data.currentList)
+        ItemTouchHelper(dragHelper).attachToRecyclerView(unspecified)
+        
+        findViewById<LinearLayout>(R.id.categories).removeAllViews()
+        currList.tasks.keys.forEach(this::getOrCreateCategory)
         
         updateUI()
     }
     
-    private fun clearUI() {
-        findViewById<TableLayout>(R.id.taskList).removeAllViews()
-        findViewById<LinearLayout>(R.id.categories).removeAllViews()
-    }
-
     override fun onPause() {
         super.onPause()
     
@@ -232,18 +261,17 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     override fun onDialogPositiveClick() {
         val taskCount = taskCount()
         
-        val taskList = findViewById<TableLayout>(R.id.taskList)
-        taskList.removeAllViews()
+        event(DeleteAll(taskCount))
+        data(this).currentList().tasks.clear()
+        findViewById<RecyclerView>(R.id.taskList).adapter?.also { it.notifyDataSetChanged() }
         
         val categories = findViewById<LinearLayout>(R.id.categories)
         categories.removeAllViews()
         
-        event(DeleteAll(taskCount))
-        data(this).currentList().tasks.clear()
     }
 
     fun onRestoreClick(@Suppress("UNUSED_PARAMETER") view: View) {
-        history.remove()?.also(::redo)
+        history.remove()?.also(::undo)
     }
 
     override fun onRequestPermissionsResult(
@@ -300,7 +328,6 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
                 history.clear()
             }
             
-            clearUI()
             populateUI()
         }
     }
@@ -340,9 +367,11 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
                 Log.e(CHANGE_TASK, "Expected indNew (${action.indNew}) to == indOld (${action.indOld})")
                 return
             }
-            ((tasksNew[action.indNew] as TableRow)[TEXT_COLUMN] as TextView).text = action.descNew
-            data(this).currentList().tasks[action.catNew]?.
-                also { tasks -> tasks[action.indNew] = action.descNew }
+            (tasksNew.adapter as? TaskAdapter)?.also {
+                it.tasks[action.indNew] = action.descNew
+                it.notifyItemChanged(action.indNew)
+            }
+            
         } else {
             val tasksOld = getOrCreateCategory(action.catOld)
             if (action.indOld !in IntRange(0, tasksOld.childCount)) {
@@ -358,20 +387,20 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         }
     }
     
-    private fun getOrCreateCategory(categoryId: Long) : TableLayout {
+    private fun getOrCreateCategory(categoryId: Long) : RecyclerView {
         if (categoryId == UNCATEGORIZED)
             return findViewById(R.id.taskList)
         
         val categories = findViewById<LinearLayout>(R.id.categories)
-        return categories.children.filter { view ->
-            val id = view.tag as Long
-            categoryId == id
-        }.map { view ->
-            (view as LinearLayout).getChildAt(TASKS_INDEX) as TableLayout
-        }.firstOrNull() ?: createCategory(categories, categoryId)
+        for (view in categories.children)
+            if (categoryId == view.tag as Long) {
+                val child = (view as LinearLayout).getChildAt(TASKS_INDEX) as RecyclerView
+                return child
+            }
+        return createCategory(categories, categoryId)
     }
     
-    private fun createCategory(categories: LinearLayout, categoryId: Long): TableLayout {
+    private fun createCategory(categories: LinearLayout, categoryId: Long): RecyclerView {
         val data = data(this)
         val category = data.categories[categoryId]
         val icon = category?.icon?.let { cache(this).iconMap[it] }
@@ -417,82 +446,36 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         catText.setTextSize(TypedValue.COMPLEX_UNIT_SP, templateText.textSize)
         category?.name?.also { catText.text = it }
         
-        val tasks = TableLayout(applicationContext)
-        categoryView.addView(tasks)
-        val tasksLayout = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        val currList = data.currentList()
+        
+        val backingList = currList.tasks.getOrPut(categoryId, ::ArrayList)
+        val adapter = TaskAdapter(this, backingList, categoryId, data.currentList)
+        
+        val tasks = RecyclerView(applicationContext)
+        val tasksLayout = RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
         tasks.layoutParams = tasksLayout
+        tasks.layoutManager = LinearLayoutManager(this)
+        tasks.adapter = adapter
+        categoryView.addView(tasks)
+        ItemTouchHelper(dragHelper).attachToRecyclerView(tasks)
         return tasks
     }
     
-    private fun createTasks(categoryId: Long, tasks: ArrayList<String>, data: Data) {
-        val category = data.categories[categoryId]
-        if (category != null)
-            Log.i(CREATE_TASK, "Creating Category '${category.name}' and it's tasks.")
-        else
-            Log.i(CREATE_TASK, "Creating uncategorized tasks.")
-        tasks.forEach { description -> createTask(CreateTask(description, data.currentList, categoryId,-1), true) }
-    }
-    
-    private fun createTask(action: CreateTask, isInit : Boolean = false) {
+    private fun createTask(action: CreateTask) {
         val tasks = getOrCreateCategory(action.category)
         Log.i(CREATE_TASK, "Adding task @ ${action.index}")
         
-        if (!isInit)
-            data(this).addTask(action.listName,action.category, action.description, action.index)
-        
         val i = if (action.index == -1) tasks.size else action.index.coerceIn(0, tasks.size)
-
-        val taskDescTmpl = findViewById<TextView>(R.id.taskDescriptionTextTemplate)
-
-        val row = TableRow(applicationContext)
-        tasks.addView(row, i)
-        row.layoutParams = TableLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
-        row.setPadding(16, 0, 16, 0)
-
-        val textView = TextView(applicationContext)
-        row.addView(textView)
-        textView.layoutParams = taskDescTmpl.layoutParams
-        textView.text = action.description
-        textView.setTextColor(taskDescTmpl.textColors)
-        textView.setPadding(0,12,0,12)
-        textView.setOnClickListener {
-            editTask(tasks.indexOfChild(row), action.category, textView.text.toString())
+        
+        (tasks.adapter as? TaskAdapter)?.also {
+            it.tasks.add(i, action.description)
+            it.notifyItemInserted(i)
+        }?:run {
+            Log.w(CREATE_TASK, "Failed to retrieve category from backing data.")
         }
-
-        val deleteButton = ImageButton(applicationContext)
-        row.addView(deleteButton)
-        val deleteLayout = TableRow.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
-        deleteLayout.gravity = CENTER_VERTICAL
-        deleteButton.layoutParams = deleteLayout
-        deleteButton.setPadding(6, 6, 6, 6)
-        deleteButton.setImageResource(android.R.drawable.ic_menu_delete)
-        deleteButton.setBackgroundColor(TRANSPARENT)
-        deleteButton.setOnClickListener {
-            event(DeleteTask(textView.text.toString(), action.listName, action.category,tasks.indexOfChild(row)))
-        }
-
-        val moveView = LinearLayout(applicationContext)
-        row.addView(moveView)
-        moveView.orientation = LinearLayout.VERTICAL
-        moveView.layoutParams = TableRow.LayoutParams(WRAP_CONTENT, MATCH_PARENT)
-        moveView.weightSum = 0f
-
-        val buttonUp = ImageButton(applicationContext)
-        moveView.addView(buttonUp)
-        buttonUp.layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, 0.5f)
-        buttonUp.setImageResource(android.R.drawable.arrow_up_float)
-        buttonUp.setBackgroundColor(TRANSPARENT)
-        buttonUp.setOnClickListener { moveUp(tasks, row, action.category) }
-
-        val buttonDown = ImageButton(applicationContext)
-        moveView.addView(buttonDown)
-        buttonDown.layoutParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, 0.5f)
-        buttonDown.setImageResource(android.R.drawable.arrow_down_float)
-        buttonDown.setBackgroundColor(TRANSPARENT)
-        buttonDown.setOnClickListener { moveDown(tasks, row, action.category) }
     }
 
-    private fun editTask(index: Int, categoryId: Long, description: String) {
+    fun editTask(index: Int, categoryId: Long, description: String) {
         val intent = Intent(this, CreateTaskActivity::class.java)
         intent.putExtra(CATEGORY, categoryId)
         intent.putExtra(INDEX, index)
@@ -500,42 +483,20 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         getContent.launch(intent)
     }
 
-    private fun moveUp(taskList: TableLayout, row: TableRow, categoryId: Long) {
-        val index = taskList.indexOfChild(row)
-        if (index <= 0)
-            return
-
-        val new = index - 1
-        val previous = taskList[new] as TableRow
-        val prevText = previous[TEXT_COLUMN] as TextView
-        val data = data(this)
-        data.currentList().tasks[categoryId]?.swap(new, index)
-        event(MoveTask(index, new, prevText.text.toString(), categoryId, data.currentList))
-    }
-
-    private fun moveDown(taskList: TableLayout, row: TableRow, categoryId: Long) {
-        val index = taskList.indexOfChild(row)
-        val new = index + 1
-        if (index >= taskList.size - 1)
-            return
-
-        val next = taskList[new] as TableRow
-        val nextText = next[TEXT_COLUMN] as TextView
-        event(MoveTask(index, new, nextText.text.toString(), categoryId, data(this).currentList))
-    }
-
     private fun deleteTask(action: DeleteTask) {
-        data(this).currentList().tasks[action.category]?.removeAt(action.index)
-        getOrCreateCategory(action.category)
-            .removeViewAt(action.index)
+        val tasks = getOrCreateCategory(action.category)
+        (tasks.adapter as? TaskAdapter)?.also {
+            it.tasks.removeAt(action.index)
+            it.notifyItemRemoved(action.index)
+        }
     }
 
     private fun moveTask(action: MoveTask) {
         Log.i(MOVE_TASK, "Moving row ${action.old} to ${action.new}")
         
-        val tasks = getOrCreateCategory(action.categoryID)
+        val category = getOrCreateCategory(action.categoryID)
         
-        val range = IntRange(0, tasks.size - 1)
+        val range = IntRange(0, category.size - 1)
         if (action.old !in range) {
             Log.i(MOVE_TASK, "old: ${action.old} is out of range $range")
             return
@@ -544,21 +505,14 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
             Log.i(MOVE_TASK, "new: ${action.new} is out of range $range")
             return
         }
-
-        val curr = tasks[action.old] as TableRow
-        val next = tasks[action.new] as TableRow
-        val currText = curr[TEXT_COLUMN] as TextView
-        val nextText = next[TEXT_COLUMN] as TextView
-        val swap = nextText.text
-        nextText.text = currText.text
-        currText.text = swap
+        (category.adapter as? TaskAdapter)?.moveItem(action.old, action.new, false)
     }
     
-    private fun event(action: Action<*>) {
+    fun event(action: Action<*>) {
         val settings = settings(this)
         when (action) {
             is CreateTask -> {
-                createTask(action)
+                 createTask(action)
                 if (settings.trackCreate)
                     history.add(action)
                 else
@@ -590,7 +544,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         updateUI()
     }
 
-    private fun redo(action: Action<*>) {
+    private fun undo(action: Action<*>) {
         when (action) {
             is CreateTask -> deleteTask(action.inverse())
             is ChangeTask -> changeTask(action.inverse())
@@ -601,18 +555,26 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         updateUI()
     }
 
+    fun setItemBG(target: View, pos: Int) {
+        target.setBackgroundColor(if (pos % 2 == 1) rowOddColor.data else rowEvenColor.data)
+    }
+    
     private fun updateUI() {
-        fun colorRows(tasks: TableLayout) {
-            for (i in 0 until tasks.size)
-                (tasks[i] as TableRow).setBackgroundColor((if (i % 2 == 1) rowOddColor else rowEvenColor).data)
+        Log.i("updateUI", "updating UI")
+        fun colorRows(tasks: RecyclerView) {
+            for (i in 0 until tasks.size) {
+                val child = tasks[i]
+                val pos = tasks.getChildViewHolder(child).bindingAdapterPosition
+                setItemBG(child, pos)
+            }
         }
         
-        val taskList = findViewById<TableLayout>(R.id.taskList)
+        val taskList = findViewById<RecyclerView>(R.id.taskList)
         colorRows(taskList)
         
         findViewById<LinearLayout>(R.id.categories).forEach { category ->
-            val tasks = (category as LinearLayout).getChildAt(TASKS_INDEX) as TableLayout
-            category.visibility = if (tasks.isEmpty()) GONE else VISIBLE
+            val tasks = (category as LinearLayout).getChildAt(TASKS_INDEX) as RecyclerView
+            category.visibility = if ((tasks.adapter?.itemCount?:0) == 0) GONE else VISIBLE
             colorRows(tasks)
         }
         

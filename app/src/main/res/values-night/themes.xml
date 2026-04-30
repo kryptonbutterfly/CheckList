@@ -24,6 +24,8 @@
         <item name="icon_border_color">@color/Gray10</item>
         <item name="icon_color">@color/Gray70</item>
 
+        <item name="itemGlowColor">?android:attr/colorActivatedHighlight</item>
+
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>

@@ -7,7 +7,6 @@ import kryptonbutterfly.checklist.actions.ActionAdapter
 
 object Constants
 {
-    const val TEXT_COLUMN = 0
     const val CATEGORY_HEADER_INDEX = 0
     const val CATEGORY_TITLE_INDEX = 1
     const val TASKS_INDEX = 1

@@ -38,4 +38,5 @@
     <string name="button_import_md">Import .md</string>
     <string name="importTitle">Import</string>
     <string name="switchTrackSkipTitle">skip duplicate Tasks</string>
+    <string name="button_delete_task">delete Task</string>
 </resources>
