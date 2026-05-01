@@ -71,7 +71,7 @@
 
     </LinearLayout>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollview"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -139,6 +139,7 @@
                     android:id="@+id/taskList"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:nestedScrollingEnabled="false"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -182,7 +183,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@android:color/transparent"
-                        android:drawableStart="@drawable/import_button"
                         android:drawablePadding="16dp"
                         android:gravity="start|center_vertical"
                         android:onClick="onImportClick"
@@ -192,13 +192,13 @@
                         android:text="@string/button_import_md"
                         android:textAllCaps="false"
                         android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        app:drawableStartCompat="@drawable/import_button" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@android:color/transparent"
-                        android:drawableStart="@android:drawable/ic_menu_save"
                         android:drawablePadding="16dp"
                         android:gravity="start|center_vertical"
                         android:onClick="onExportClick"
@@ -208,7 +208,8 @@
                         android:text="@string/button_export_md"
                         android:textAllCaps="false"
                         android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        app:drawableStartCompat="@android:drawable/ic_menu_save" />
 
                     <View
                         android:layout_width="match_parent"
@@ -221,7 +222,6 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@android:color/transparent"
-                        android:drawableStart="@android:drawable/ic_menu_preferences"
                         android:drawablePadding="16dp"
                         android:gravity="start|center_vertical"
                         android:onClick="onSettingsClick"
@@ -230,14 +230,14 @@
                         android:text="@string/title_settings_button"
                         android:textAllCaps="false"
                         android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        app:drawableStartCompat="@android:drawable/ic_menu_preferences" />
 
                     <TextView
                         android:id="@+id/addListButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@android:color/transparent"
-                        android:drawableStart="@android:drawable/ic_menu_add"
                         android:drawablePadding="16dp"
                         android:gravity="start|center_vertical"
                         android:onClick="onAddListClick"
@@ -246,11 +246,12 @@
                         android:text="@string/button_add_list"
                         android:textAllCaps="false"
                         android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        app:drawableStartCompat="@android:drawable/ic_menu_add" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </FrameLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <LinearLayout
         android:id="@+id/categoryTemplate"

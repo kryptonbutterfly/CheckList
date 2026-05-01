@@ -459,6 +459,8 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         tasks.layoutParams = tasksLayout
         tasks.layoutManager = LinearLayoutManager(this)
         tasks.adapter = adapter
+        tasks.isNestedScrollingEnabled = false
+        
         categoryView.addView(tasks)
         ItemTouchHelper(dragHelper).attachToRecyclerView(tasks)
         return tasks
