@@ -13,4 +13,4 @@ A primitive checklist app.
 </div>
 
 ## Download
-[CheckList.apk](https://github.com/kryptonbutterfly/CheckList/releases/download/v4.1.3/CheckList.apk)
+[CheckList.apk](https://github.com/kryptonbutterfly/CheckList/releases/download/v4.1.4/CheckList.apk)

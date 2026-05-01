@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     private val dragHelper = object: ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.UP or ItemTouchHelper.DOWN,
         0) {
+        
         override fun onMove(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder,
@@ -75,9 +76,9 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         }
         
         override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-            super.onSelectedChanged(viewHolder, actionState)
             if (actionState != ItemTouchHelper.ACTION_STATE_IDLE)
                 (viewHolder as? ItemTouchViewHolder)?.onItemSelected()
+            super.onSelectedChanged(viewHolder, actionState)
         }
         
         override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
@@ -158,20 +159,22 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         }
     }
     
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        if (this::dropDown.isInitialized && this.dropDown.isVisible)
-            ev?.takeIf { it.action == MotionEvent.ACTION_UP } ?.also {
-                val loc = IntArray(2)
-                dropDown.getLocationOnScreen(loc)
-                val rect =
-                    Rect(loc[0], loc[1], loc[0] + dropDown.width, loc[1] + dropDown.height)
-                val x = it.rawX.toInt()
-                val y = it.rawY.toInt()
-                if (!rect.contains(x, y)) {
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (this::dropDown.isInitialized && this.dropDown.isVisible) {
+            val loc = IntArray(2)
+            this.dropDown.getLocationOnScreen(loc)
+            val rect = Rect(loc[0], loc[1], loc[0] + dropDown.width, loc[1] + dropDown.height)
+            val x = ev.rawX.toInt()
+            val y = ev.rawY.toInt()
+            if (!rect.contains(x, y)) {
+                if (ev.action == MotionEvent.ACTION_UP) {
                     this.dropDown.visibility = GONE
                     return true
+                } else {
+                    return false
                 }
             }
+        }
         return super.dispatchTouchEvent(ev)
     }
 
