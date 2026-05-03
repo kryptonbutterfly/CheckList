@@ -1,6 +1,5 @@
 package kryptonbutterfly.checklist.ui
 
-import android.os.Build
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
@@ -17,6 +16,8 @@ import kryptonbutterfly.checklist.actions.DeleteTask
 import kryptonbutterfly.checklist.actions.MoveTask
 import java.util.Collections
 
+private const val ANIMATION_DURATION: Long = 50
+
 class TaskAdapter(
 	private val context: MainActivity,
 	val tasks: ArrayList<String>,
@@ -30,7 +31,7 @@ class TaskAdapter(
 		
 		override fun onItemSelected() {
 			itemView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
-			itemView.animate().scaleX(1.03F).scaleY(1.03F).setDuration(120).start()
+			itemView.animate().scaleX(1.03F).scaleY(1.03F).setDuration(ANIMATION_DURATION).start()
 			ViewCompat.setElevation(itemView, 12F)
 			itemView.alpha = 0.95F
 			itemView.foreground = itemGlow
@@ -38,7 +39,7 @@ class TaskAdapter(
 		}
 		
 		override fun onItemClear() {
-			itemView.animate().scaleX(1F).scaleY(1F).setDuration(120).start()
+			itemView.animate().scaleX(1F).scaleY(1F).setDuration(ANIMATION_DURATION).start()
 			ViewCompat.setElevation(itemView, 0F)
 			itemView.alpha = 1F
 			itemView.foreground = null

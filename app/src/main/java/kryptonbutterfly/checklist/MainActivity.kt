@@ -19,7 +19,6 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.core.view.forEach
 import androidx.core.view.get
@@ -157,6 +156,8 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
             }
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
+        
+        setAnimatorDurations(findViewById<RecyclerView>(R.id.taskList).itemAnimator)
     }
     
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
@@ -461,6 +462,8 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         tasks.adapter = adapter
         tasks.isNestedScrollingEnabled = false
         
+        setAnimatorDurations(tasks.itemAnimator)
+        
         categoryView.addView(tasks)
         ItemTouchHelper(dragHelper).attachToRecyclerView(tasks)
         return tasks
@@ -585,5 +588,14 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
         
         findViewById<ImageButton>(R.id.restoreButton).visibility =
             if (history.isEmpty()) GONE else VISIBLE
+    }
+    
+    private fun setAnimatorDurations(animator: RecyclerView.ItemAnimator?) {
+        animator?.apply {
+            addDuration = 50
+            removeDuration = 50
+            moveDuration = 50
+            changeDuration = 30
+        }
     }
 }
