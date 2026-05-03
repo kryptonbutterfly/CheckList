@@ -49,20 +49,18 @@ data class Data(
         return lists.getOrPut(currentList, ::CheckList)
     }
     
-    fun addTask(listName: String, categoryId: Long, description: String, index: Int) {
-        val list = lists.getOrPut(listName, ::CheckList)
-        list.addTask(categoryId, description, index)
-    }
-    
     fun prune() {
         Log.i("DATA", "pruning")
      
         val unusedCategories = HashSet(categories.keys)
-        lists.values.forEach { it.prune(unusedCategories) }
+        lists.values.forEach { it.removeUsedCategoriesFromSet(unusedCategories) }
         unusedCategories.forEach { it -> categories.remove(it) }
     }
     fun pruneLists() {
         Log.i("DATA", "pruning lists")
-        lists.entries.removeIf { list -> list.value.tasks.isEmpty() }
+        
+        lists.values.forEach { it.pruneCategories() }
+        
+        lists.entries.removeIf { it.value.tasks.isEmpty() && it.key != currentList }
     }
 }

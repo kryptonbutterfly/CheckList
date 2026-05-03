@@ -1,6 +1,7 @@
 package kryptonbutterfly.checklist.persistence
 
 import com.google.gson.annotations.Expose
+import kryptonbutterfly.checklist.Constants.UNCATEGORIZED
 import kryptonbutterfly.checklist.actions.Action
 import kryptonbutterfly.checklist.actions.ChangeTask
 import kryptonbutterfly.checklist.actions.CreateTask
@@ -28,9 +29,20 @@ data class CheckList(
 		}
 	}
 	
-	fun prune(unusedCategories: HashSet<Long>) {
-		tasks.values.removeIf { catTasks -> catTasks.isEmpty() }
-		
+	/**
+	 * prune empty categories from this list
+	 */
+	fun pruneCategories() {
+		tasks.entries.removeIf {
+			it.value.isEmpty() && it.key != UNCATEGORIZED
+		}
+	}
+	
+	/**
+	 * Expects a set of categoryIDs and removes any used in this list.
+	 * @param unusedCategories A set of categoryIDs that have not yet been established as being in use
+	 */
+	fun removeUsedCategoriesFromSet(unusedCategories: HashSet<Long>) {
 		tasks.entries.forEach {
 			if (it.value.isNotEmpty())
 				unusedCategories.remove(it.key)
