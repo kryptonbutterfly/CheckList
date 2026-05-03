@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     private lateinit var spinnerList: Spinner
     private lateinit var listsAdapter: ArrayAdapter<String>
     
-    private val history = Stack<Action<*>>()
+    private lateinit var history : Stack<Action<*>>
     
     private val dragHelper = object: ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.UP or ItemTouchHelper.DOWN,
@@ -185,10 +185,10 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
     
     private fun populateUI() {
         Log.v("populateUI", "Populating UI")
-        history.limit = settings(this).undoLength
         
         val data = data(this)
         val currList = data.currentList()
+        history = Stack(currList.history, settings(this).undoLength)
         
         listsAdapter.clear()
         listsAdapter.addAll(data.lists.keys)

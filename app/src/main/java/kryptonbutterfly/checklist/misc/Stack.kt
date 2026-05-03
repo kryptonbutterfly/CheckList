@@ -2,11 +2,11 @@ package kryptonbutterfly.checklist.misc
 
 import java.util.*
 
-class Stack<E> {
-    var backingList = LinkedList<E>()
-    var limit: Int = 1
-        set(limit) {
-            field = limit
+class Stack<E>(var backingList: LinkedList<E>, limit: Int = 1) {
+    var limit: Int = limit
+        set(value) {
+            require(value >= 0) { "limit must be >= 0" }
+            field = value
             enforceLimit()
         }
 
