@@ -21,7 +21,7 @@ class CreateCategory : ComponentActivity() {
 				val view = findViewById<ImageView>(R.id.categoryIcon)
 				val cache = cache(this)
 				Log.i("CREATE_CATEGORY", "uri $it")
-				cache.addIcon(this, it)?.
+				cache.addIcon(this, it, view.width, view.height)?.
 					also { name ->
 						Log.i("CREATE_CATEGORY", "icon name: $name")
 						iconName = name

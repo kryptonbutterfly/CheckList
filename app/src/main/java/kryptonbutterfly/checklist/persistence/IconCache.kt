@@ -1,6 +1,6 @@
 package kryptonbutterfly.checklist.persistence
 
-import android.content.ContextWrapper
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -8,42 +8,55 @@ import android.provider.OpenableColumns
 import androidx.core.database.getStringOrNull
 import java.io.File
 import java.io.FileOutputStream
+import kryptonbutterfly.checklist.misc.scale
 
 private const val ICON_CACHE_FOLDER: String = "icon_cache/"
-
-private fun loadIconCache(context: ContextWrapper): IconCache {
-	val folder = File(context.filesDir, ICON_CACHE_FOLDER)
+private fun iconCacheFolder(context: Context): File {
+	return File(context.filesDir, ICON_CACHE_FOLDER)
+}
+private fun loadIconCache(context: Context): IconCache {
 	val iconCache = IconCache()
-	if (folder.exists())
-		iconCache.loadIcons(context)
+	iconCache.loadIcons(context)
 	return iconCache
 }
 
 private var cache : IconCache? = null
-fun cache(context: ContextWrapper) : IconCache {
+fun cache(context: Context) : IconCache {
 	return cache ?: loadIconCache(context).also { cache = it }
 }
 
 data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
-	fun addIcon(context: ContextWrapper, uri: Uri): String? {
+	fun addIcon(context: Context, uri: Uri, targetWidth: Int, targetHeight: Int): String? {
 		context.contentResolver.query(uri,
 			arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.
 			use {
 				if (!it.moveToFirst())
 					return null
 				val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-				it.getStringOrNull(nameIndex)?.also { name ->
+				it.getStringOrNull(nameIndex)?.also{ name ->
 					context.contentResolver.openInputStream(uri).use { iStream ->
-						val bitmap = BitmapFactory.decodeStream(iStream)
-						return addIcon(context, name, bitmap)
+						BitmapFactory.decodeStream(iStream)?.also { bitmap ->
+							val scaled = scaleToFit(bitmap, targetWidth, targetHeight)
+							return addIcon(context, name, scaled)
+						}
 					}
 				}
 			}
 		return null
 	}
 	
-	private fun addIcon(context: ContextWrapper, name: String, icon: Bitmap): String {
-		val folder = File(context.filesDir, ICON_CACHE_FOLDER)
+	private fun scaleToFit(source: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+		val scaleWidth = maxWidth.toFloat() / source.width.toFloat()
+		val scaleHeight = maxHeight.toFloat() / source.height.toFloat()
+		if (scaleWidth >= 1 && scaleHeight >= 1)
+			return source
+		
+		val scale = if (scaleWidth > scaleHeight) scaleHeight else scaleWidth
+		return scale(source, scale)
+	}
+	
+	private fun addIcon(context: Context, name: String, icon: Bitmap): String {
+		val folder = iconCacheFolder(context)
 		if (!folder.exists())
 			folder.mkdirs()
 		val iconName: String
@@ -72,10 +85,12 @@ data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 		return fileName
 	}
 	
-	fun loadIcons(context: ContextWrapper) {
-		val folder = File(context.filesDir, ICON_CACHE_FOLDER)
+	fun loadIcons(context: Context) {
+		val folder = iconCacheFolder(context)
 		if (!folder.exists())
 			return
-		folder.listFiles { it.isFile } ?.forEach { file -> this.iconMap.put(file.name, BitmapFactory.decodeFile(file.absolutePath)) }
+		folder.listFiles { it.isFile } ?.forEach { file ->
+			this.iconMap.put(file.name, BitmapFactory.decodeFile(file.absolutePath))
+		}
 	}
 }
