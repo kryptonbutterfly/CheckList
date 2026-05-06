@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">CheckList</string>
     <string name="title_activity_create_task">CreateTaskActivity</string>
-    <string name="title_activity_main">Task List</string>
+    <string name="title_activity_main">CheckList</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="HintTaskDescription">Task</string>
