@@ -16,7 +16,9 @@ private fun loadData(context: Context): Data {
     if (!file.exists())
         return Data()
     val json = file.bufferedReader().use { it.readText() }
-    return GSON.fromJson(json, Data::class.java)
+    val data = GSON.fromJson(json, Data::class.java)
+    raw = json
+    return data
 }
 
 fun saveData(context: Context) {
@@ -24,12 +26,20 @@ fun saveData(context: Context) {
         data.pruneLists()
         val json = GSON.toJson(data)
         val file = File(context.filesDir, TASKS_LIST_FILE)
+        if (file.exists() && json.equals(raw)) {
+            Log.d("PERSIST-DATA", "skip persisting — file exists and nothing has changed!")
+            return
+        }
+        
         if (file.parentFile != null && !file.parentFile!!.exists())
             file.parentFile!!.mkdirs()
+        
         file.bufferedWriter().use { it.write(json) }
+        raw = json
     }
 }
 
+private var raw: String? = null
 private var data : Data? = null
 fun data(context: Context): Data {
     return data ?: loadData(context).also { data = it }
