@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import androidx.core.database.getStringOrNull
 import java.io.File
 import java.io.FileOutputStream
@@ -37,10 +38,19 @@ data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 					context.contentResolver.openInputStream(uri).use { iStream ->
 						BitmapFactory.decodeStream(iStream)?.also { bitmap ->
 							val scaled = scaleToFit(bitmap, targetWidth, targetHeight)
-							return addIcon(context, name, scaled)
+							return exists(scaled) ?: addIcon(context, name, scaled)
 						}
 					}
 				}
+			}
+		return null
+	}
+	
+	private fun exists(icon: Bitmap): String? {
+		for (e in iconMap)
+			if (icon.sameAs(e.value)) {
+				Log.d("ICON_CACHE", "icon already known as: ${e.key}")
+				return e.key
 			}
 		return null
 	}
@@ -90,7 +100,8 @@ data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 		if (!folder.exists())
 			return
 		folder.listFiles { it.isFile } ?.forEach { file ->
-			this.iconMap.put(file.name, BitmapFactory.decodeFile(file.absolutePath))
+			val icon = BitmapFactory.decodeFile(file.absolutePath)
+			this.iconMap[file.name] = icon
 		}
 	}
 }
