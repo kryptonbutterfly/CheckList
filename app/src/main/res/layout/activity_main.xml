@@ -9,7 +9,7 @@
     <LinearLayout
         android:id="@+id/menu"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:background="?attr/backgroundColor"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -32,7 +32,7 @@
             app:srcCompat="@android:drawable/ic_menu_delete" />
 
         <Space
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="30"
             android:visibility="visible" />
@@ -73,7 +73,7 @@
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollview"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/menu"
         app:layout_constraintEnd_toEndOf="parent"
@@ -83,7 +83,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="0dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -116,7 +116,7 @@
                         android:layout_height="0dp"
                         android:layout_marginEnd="8dp"
                         android:background="@drawable/rounded_corner_xxs"
-                        android:padding="12dp"
+                        android:paddingHorizontal="12dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/settingsButton"
                         app:layout_constraintStart_toStartOf="parent"
@@ -124,7 +124,7 @@
 
                         <Spinner
                             android:id="@+id/spinnerList"
-                            android:layout_width="0dp"
+                            android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:popupBackground="@drawable/rounded_corner_xxs"
                             app:layout_constraintBottom_toBottomOf="parent"
@@ -138,7 +138,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/taskList"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -147,7 +147,7 @@
 
                 <LinearLayout
                     android:id="@+id/categories"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"

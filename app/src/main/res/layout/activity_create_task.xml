@@ -7,7 +7,7 @@
     tools:context="kryptonbutterfly.checklist.CreateTaskActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
@@ -17,7 +17,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/categoryInput"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             app:hintEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -37,7 +37,7 @@
 
         <ScrollView
             android:id="@+id/scrollView2"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -48,7 +48,7 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:orientation="horizontal">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -77,15 +77,13 @@
 
                 <ImageButton
                     android:id="@+id/addCategoryBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:layout_margin="8dp"
                     android:adjustViewBounds="true"
                     android:background="@drawable/rounded_corner"
                     android:contentDescription="@string/add_category"
                     android:foreground="@drawable/plus"
-                    android:minWidth="48dp"
-                    android:minHeight="48dp"
                     android:onClick="onAddCategory"
                     android:tooltipText="@string/add_category"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -100,8 +98,8 @@
 
     <LinearLayout
         android:id="@+id/linearLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:background="?attr/backgroundColor"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -122,8 +120,8 @@
             tools:ignore="VisualLintButtonSize" />
 
         <Space
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="3" />
 
         <Button
