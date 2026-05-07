@@ -10,39 +10,41 @@ import androidx.core.database.getStringOrNull
 import java.io.File
 import java.io.FileOutputStream
 import kryptonbutterfly.checklist.misc.scale
+import java.util.UUID
 
 private const val ICON_CACHE_FOLDER: String = "icon_cache/"
 private fun iconCacheFolder(context: Context): File {
 	return File(context.filesDir, ICON_CACHE_FOLDER)
 }
+
 private fun loadIconCache(context: Context): IconCache {
 	val iconCache = IconCache()
 	iconCache.loadIcons(context)
 	return iconCache
 }
 
-private var cache : IconCache? = null
-fun cache(context: Context) : IconCache {
+private var cache: IconCache? = null
+fun cache(context: Context): IconCache {
 	return cache ?: loadIconCache(context).also { cache = it }
 }
 
 data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 	fun addIcon(context: Context, uri: Uri, targetWidth: Int, targetHeight: Int): String? {
-		context.contentResolver.query(uri,
-			arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.
-			use {
-				if (!it.moveToFirst())
-					return null
-				val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-				it.getStringOrNull(nameIndex)?.also{ name ->
-					context.contentResolver.openInputStream(uri).use { iStream ->
-						BitmapFactory.decodeStream(iStream)?.also { bitmap ->
-							val scaled = scaleToFit(bitmap, targetWidth, targetHeight)
-							return exists(scaled) ?: addIcon(context, name, scaled)
-						}
+		context.contentResolver.query(
+			uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null
+		)?.use {
+			if (!it.moveToFirst())
+				return null
+			val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+			it.getStringOrNull(nameIndex)?.also { name ->
+				context.contentResolver.openInputStream(uri).use { iStream ->
+					BitmapFactory.decodeStream(iStream)?.also { bitmap ->
+						val scaled = scaleToFit(bitmap, targetWidth, targetHeight)
+						return exists(scaled) ?: addIcon(context, name, scaled)
 					}
 				}
 			}
+		}
 		return null
 	}
 	
@@ -69,8 +71,8 @@ data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 		val folder = iconCacheFolder(context)
 		if (!folder.exists())
 			folder.mkdirs()
-		val iconName: String
 		val format: Bitmap.CompressFormat
+		val iconName: String
 		if (name.contains('.')) {
 			val dot = name.lastIndexOf('.')
 			iconName = name.substring(0, dot)
@@ -86,7 +88,7 @@ data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 			format = Bitmap.CompressFormat.PNG
 		}
 		
-		val fileName = "$iconName.${format.name.lowercase()}"
+		val fileName = makeUnique(iconName, format)
 		val file = File(folder, fileName)
 		FileOutputStream(file).use { oStream ->
 			icon.compress(format, 100, oStream)
@@ -95,11 +97,23 @@ data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 		return fileName
 	}
 	
+	private fun makeUnique(name: String, format: Bitmap.CompressFormat): String {
+		val ext = ".${format.name.lowercase()}"
+		var result = "$name.$ext"
+		while (iconMap.containsKey(result)) {
+			val uuid = UUID.randomUUID()
+			val lsb = uuid.leastSignificantBits.toULong().toString(32).uppercase()
+			val msb = uuid.mostSignificantBits.toULong().toString(32).uppercase()
+			result = "${name}_$lsb-$msb$ext"
+		}
+		return result
+	}
+	
 	fun loadIcons(context: Context) {
 		val folder = iconCacheFolder(context)
 		if (!folder.exists())
 			return
-		folder.listFiles { it.isFile } ?.forEach { file ->
+		folder.listFiles { it.isFile }?.forEach { file ->
 			val icon = BitmapFactory.decodeFile(file.absolutePath)
 			this.iconMap[file.name] = icon
 		}
