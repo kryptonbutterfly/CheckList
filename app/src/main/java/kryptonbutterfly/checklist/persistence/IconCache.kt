@@ -28,13 +28,29 @@ fun cache(context: Context): IconCache {
 	return cache ?: loadIconCache(context).also { cache = it }
 }
 
+private const val TAG = "ICON_CACHE"
+
 data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
+	/**
+	 * delete all unused icons
+	 */
+	fun cleanUp(context: Context, data: Data) {
+		Log.i(TAG, "cleanUp")
+		val usedIcons = data.categories.values.mapNotNull { it.icon }.toSet()
+		val unusedIcons = iconMap.keys.filter { name -> !usedIcons.contains(name) }.toSet()
+		Log.d(TAG, "deleting: $unusedIcons")
+		val folder = iconCacheFolder(context)
+		unusedIcons.forEach { name ->
+			iconMap.remove(name)
+			val file = File(folder, name)
+			if (file.isFile && file.exists()) file.delete()
+		}
+	}
 	fun addIcon(context: Context, uri: Uri, targetWidth: Int, targetHeight: Int): String? {
 		context.contentResolver.query(
 			uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null
 		)?.use {
-			if (!it.moveToFirst())
-				return null
+			if (!it.moveToFirst()) return null
 			val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
 			it.getStringOrNull(nameIndex)?.also { name ->
 				context.contentResolver.openInputStream(uri).use { iStream ->
@@ -48,20 +64,15 @@ data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 		return null
 	}
 	
-	private fun exists(icon: Bitmap): String? {
-		for (e in iconMap)
-			if (icon.sameAs(e.value)) {
-				Log.d("ICON_CACHE", "icon already known as: ${e.key}")
-				return e.key
-			}
-		return null
-	}
-	
+	private fun exists(icon: Bitmap) =
+		iconMap.entries.firstOrNull { (_, v) -> icon.sameAs(v) }?.let { (k, v) ->
+			Log.d(TAG, "icon already known as: $k")
+			return@let k
+		}
 	private fun scaleToFit(source: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
 		val scaleWidth = maxWidth.toFloat() / source.width.toFloat()
 		val scaleHeight = maxHeight.toFloat() / source.height.toFloat()
-		if (scaleWidth >= 1 && scaleHeight >= 1)
-			return source
+		if (scaleWidth >= 1 && scaleHeight >= 1) return source
 		
 		val scale = if (scaleWidth > scaleHeight) scaleHeight else scaleWidth
 		return scale(source, scale)
@@ -69,8 +80,7 @@ data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 	
 	private fun addIcon(context: Context, name: String, icon: Bitmap): String {
 		val folder = iconCacheFolder(context)
-		if (!folder.exists())
-			folder.mkdirs()
+		if (!folder.exists()) folder.mkdirs()
 		val format: Bitmap.CompressFormat
 		val iconName: String
 		if (name.contains('.')) {
@@ -99,7 +109,7 @@ data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 	
 	private fun makeUnique(name: String, format: Bitmap.CompressFormat): String {
 		val ext = ".${format.name.lowercase()}"
-		var result = "$name.$ext"
+		var result = "$name$ext"
 		while (iconMap.containsKey(result)) {
 			val uuid = UUID.randomUUID()
 			val lsb = uuid.leastSignificantBits.toULong().toString(32).uppercase()
@@ -111,8 +121,7 @@ data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 	
 	fun loadIcons(context: Context) {
 		val folder = iconCacheFolder(context)
-		if (!folder.exists())
-			return
+		if (!folder.exists()) return
 		folder.listFiles { it.isFile }?.forEach { file ->
 			val icon = BitmapFactory.decodeFile(file.absolutePath)
 			this.iconMap[file.name] = icon
