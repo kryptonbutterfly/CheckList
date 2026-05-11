@@ -26,6 +26,9 @@ sealed class Action<I>: Serializable {
                 .reduce { a, b -> "$a, $b" }
         })"
     }
+    
+    open fun isNoop(): Boolean = false
+    open fun merge(action: Action<*>): Action<I>? = null
 }
 
 data class CreateTask(
@@ -62,6 +65,22 @@ data class MoveTask(
     Action<MoveTask>() {
     override fun inverse(): MoveTask {
         return MoveTask(new, old, description, categoryID, listName)
+    }
+    
+    override fun isNoop(): Boolean = old == new
+    
+    override fun merge(action: Action<*>): MoveTask? {
+        if (action !is MoveTask)
+            return null
+        if (new != action.old)
+            return null
+        if (description != action.description)
+            return null
+        if (categoryID != action.categoryID)
+            return null
+        if (listName != action.listName)
+            return null
+        return MoveTask(old, action.new, description, categoryID, listName)
     }
 }
 

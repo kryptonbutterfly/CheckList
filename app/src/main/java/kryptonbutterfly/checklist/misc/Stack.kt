@@ -10,6 +10,10 @@ class Stack<E>(var backingList: LinkedList<E>, limit: Int = 1) {
             enforceLimit()
         }
 
+    fun peek(): E? {
+        return backingList.firstOrNull()
+    }
+    
     fun add(e: E) {
         backingList.addFirst(e)
         enforceLimit()

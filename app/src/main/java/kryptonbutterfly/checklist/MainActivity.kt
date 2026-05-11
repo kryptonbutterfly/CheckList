@@ -519,29 +519,39 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 	}
 	
 	fun event(action: Action<*>) {
+		fun addToHistory(action: Action<*>) {
+			history.peek()?.merge(action)?.also {merged ->
+				history.remove()
+				if (!merged.isNoop())
+					history.add(merged)
+			} ?: run {
+				history.add(action)
+			}
+		}
+		
 		val settings = settings(this)
 		when (action) {
 			is CreateTask -> {
 				createTask(action)
-				if (settings.trackCreate) history.add(action)
+				if (settings.trackCreate) addToHistory(action)
 				else history.clear()
 			}
 			
 			is ChangeTask -> {
 				changeTask(action)
-				if (settings.trackRename) history.add(action)
+				if (settings.trackRename) addToHistory(action)
 				else history.clear()
 			}
 			
 			is MoveTask -> {
 				moveTask(action)
-				if (settings.trackMove) history.add(action)
+				if (settings.trackMove) addToHistory(action)
 				else history.remove()
 			}
 			
 			is DeleteTask -> {
 				deleteTask(action)
-				if (settings.trackDelete) history.add(action)
+				if (settings.trackDelete) addToHistory(action)
 				else history.clear()
 			}
 			
