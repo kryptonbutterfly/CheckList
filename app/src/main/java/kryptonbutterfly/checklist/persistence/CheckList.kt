@@ -61,4 +61,6 @@ data class CheckList(
 			}
 		}
 	}
+	
+	fun isEmpty(): Boolean = tasks.values.firstOrNull { !it.isEmpty() } == null
 }

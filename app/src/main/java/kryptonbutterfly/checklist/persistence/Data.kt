@@ -71,6 +71,6 @@ data class Data(
         
         lists.values.forEach { it.pruneCategories() }
         
-        lists.entries.removeIf { it.value.tasks.isEmpty() && it.key != currentList }
+        lists.entries.removeIf { it.value.isEmpty() }
     }
 }
