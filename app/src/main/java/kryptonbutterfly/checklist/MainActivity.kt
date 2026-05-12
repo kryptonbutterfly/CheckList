@@ -37,6 +37,7 @@ import kryptonbutterfly.checklist.Constants.CATEGORY
 import kryptonbutterfly.checklist.Constants.CATEGORY_HEADER_INDEX
 import kryptonbutterfly.checklist.Constants.CATEGORY_TITLE_INDEX
 import kryptonbutterfly.checklist.Constants.CHANGE_TASK
+import kryptonbutterfly.checklist.Constants.LIST_NAME
 import kryptonbutterfly.checklist.Constants.MOVE_TASK
 import kryptonbutterfly.checklist.Constants.TASKS_INDEX
 import kryptonbutterfly.checklist.Constants.UNCATEGORIZED
@@ -125,9 +126,8 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 	
 	private val addListResult =
 		registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-			if (result.resultCode == RESULT_OK) {
+			if (result.resultCode == RESULT_OK)
 				populateUI()
-			}
 		}
 	
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -195,6 +195,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 		
 		listsAdapter.clear()
 		listsAdapter.addAll(data.lists.keys)
+		spinnerList.invalidate()
 		spinnerList.setSelection(listsAdapter.getPosition(data.currentList))
 		
 		val unspecified = findViewById<RecyclerView>(R.id.taskList)
@@ -242,7 +243,13 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 	fun onAddListClick(@Suppress("UNUSED_PARAMETER") view: View) {
 		dropDown.visibility = GONE
 		addListResult.launch(Intent(this, EditListActivity::class.java))
-		
+	}
+	
+	fun onEditListClick(@SuppressLint("UNUSED_PARAMETER") view: View) {
+		dropDown.visibility = GONE
+		val intent = Intent(this, EditListActivity::class.java)
+		intent.putExtra(LIST_NAME, data(this).currentList)
+		addListResult.launch(intent)
 	}
 	
 	fun onDropDownClick(@Suppress("UNUSED_PARAMETER") view: View) {

@@ -39,4 +39,5 @@
     <string name="importTitle">Import</string>
     <string name="switchTrackSkipTitle">skip duplicate Tasks</string>
     <string name="button_delete_task">delete Task</string>
+    <string name="button_edit_list">Edit List</string>
 </resources>

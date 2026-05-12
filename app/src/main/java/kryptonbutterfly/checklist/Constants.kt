@@ -21,6 +21,7 @@ object Constants
 
     const val ACTION = "ACTION"
     
+    const val LIST_NAME = "listName"
     const val CATEGORY = "CATEGORY"
     const val INDEX = "INDEX"
     const val DESCRIPTION = "DESCRIPTION"

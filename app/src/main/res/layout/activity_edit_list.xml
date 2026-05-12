@@ -52,11 +52,13 @@
             android:layout_weight="3" />
 
         <Button
+            android:id="@+id/buttonEditListAccept"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:layout_weight="1"
             android:background="@drawable/rounded_corner"
+            android:enabled="false"
             android:onClick="onApply"
             android:text="@string/buttonAcceptText"
             android:textAllCaps="false"
