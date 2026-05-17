@@ -6,10 +6,12 @@ import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import kryptonbutterfly.checklist.Constants.MSG_DELETE_ALL_TASKS
+import kryptonbutterfly.checklist.Constants.MSG_MARK_ALL_DONE
 import kryptonbutterfly.checklist.Constants.TEXT_CANCEL
 import kryptonbutterfly.checklist.Constants.TEXT_DELETE
+import kryptonbutterfly.checklist.Constants.TEXT_OK
 
-class DeleteAllDialog: DialogFragment() {
+class DeleteAllDialog(val delete: Boolean): DialogFragment() {
     private lateinit var listener: DialogListener
 
     interface DialogListener {
@@ -23,8 +25,8 @@ class DeleteAllDialog: DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
-            AlertDialog.Builder(it).setMessage(MSG_DELETE_ALL_TASKS)
-                .setPositiveButton(TEXT_DELETE) { _, _ -> listener.onDialogPositiveClick() }
+            AlertDialog.Builder(it).setMessage( if(delete) MSG_DELETE_ALL_TASKS else MSG_MARK_ALL_DONE)
+                .setPositiveButton(if (delete) TEXT_DELETE else TEXT_OK) { _, _ -> listener.onDialogPositiveClick() }
                 .setNeutralButton(TEXT_CANCEL){ _, _ -> }
                 .create()
         }?: throw IllegalStateException("Activity must not be null!")

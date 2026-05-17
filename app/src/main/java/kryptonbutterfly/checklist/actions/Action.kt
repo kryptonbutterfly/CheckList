@@ -30,18 +30,17 @@ sealed class Action<I>: Serializable {
     open fun isNoop(): Boolean = false
     open fun merge(action: Action<*>): Action<I>? = null
 }
-
 data class CreateTask(
     @Expose val description: String,
     @Expose val listName: String,
     @Expose val category: Long,
-    @Expose val index: Int) :
+    @Expose val index: Int,
+    @Expose val doneIndex: Int? = null) :
     Action<DeleteTask>() {
     override fun inverse(): DeleteTask {
-        return DeleteTask(description, listName, category, index)
+        return DeleteTask(description, listName, category, index, doneIndex)
     }
 }
-
 data class ChangeTask(
     @Expose val descOld: String,
     @Expose val catOld: Long,
@@ -55,7 +54,6 @@ data class ChangeTask(
         return ChangeTask(descNew, catNew, indNew, descOld, catOld, indOld, listName)
     }
 }
-
 data class MoveTask(
     @Expose val old: Int,
     @Expose val new: Int,
@@ -83,18 +81,17 @@ data class MoveTask(
         return MoveTask(old, action.new, description, categoryID, listName)
     }
 }
-
 data class DeleteTask(
     @Expose val description: String,
     @Expose val listName: String,
     @Expose val category: Long,
-    @Expose val index: Int) :
+    @Expose val index: Int,
+    @Expose val doneIndex: Int? = null) :
     Action<CreateTask>() {
     override fun inverse(): CreateTask {
-        return CreateTask(description, listName, category, index)
+        return CreateTask(description, listName, category, index, doneIndex)
     }
 }
-
 data class DeleteAll(
     @Expose val count: Int) :
     Action<Unit>() {

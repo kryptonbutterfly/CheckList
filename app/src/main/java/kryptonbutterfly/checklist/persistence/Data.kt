@@ -70,7 +70,6 @@ data class Data(
         Log.i("DATA", "pruning lists")
         
         lists.values.forEach { it.pruneCategories() }
-        
-        lists.entries.removeIf { it.value.isEmpty() }
+        lists.entries.removeIf { it.value.isEmpty() && it.key != currentList }
     }
 }

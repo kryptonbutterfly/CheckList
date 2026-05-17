@@ -7,6 +7,7 @@
     tools:context="kryptonbutterfly.checklist.EditListActivity">
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -22,7 +23,21 @@
             android:inputType="textAutoCorrect|textMultiLine"
             android:minHeight="48dp"
             android:paddingHorizontal="12dp" />
+
     </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/trackDoneSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:minHeight="48dp"
+        android:paddingHorizontal="24dp"
+        android:text="@string/track_tasks_done_title"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -66,4 +81,5 @@
             android:textStyle="bold" />
 
     </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

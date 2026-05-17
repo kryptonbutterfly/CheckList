@@ -1,11 +1,12 @@
 package kryptonbutterfly.checklist
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity.CENTER_VERTICAL
@@ -13,12 +14,14 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
+import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.cardview.widget.CardView
 import androidx.core.view.children
 import androidx.core.view.forEach
@@ -43,54 +46,21 @@ import kryptonbutterfly.checklist.Constants.TASKS_INDEX
 import kryptonbutterfly.checklist.Constants.UNCATEGORIZED
 import kryptonbutterfly.checklist.actions.*
 import kryptonbutterfly.checklist.misc.Stack
+import kryptonbutterfly.checklist.misc.dragHelper
+import kryptonbutterfly.checklist.misc.setAnimatorDurations
 import kryptonbutterfly.checklist.persistence.*
-import kryptonbutterfly.checklist.ui.ItemTouchViewHolder
 import kryptonbutterfly.checklist.ui.TaskAdapter
+import kryptonbutterfly.checklist.ui.TaskVariants
 
 const val REQUEST_PERMISSION_CODE = 0
 
-class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
+class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener, HistoryActivity {
 	private val rowOddColor = TypedValue()
 	private val rowEvenColor = TypedValue()
 	private lateinit var dropDown: CardView
 	private lateinit var spinnerList: Spinner
 	private lateinit var listsAdapter: ArrayAdapter<String>
-	
 	private lateinit var history: Stack<Action<*>>
-	
-	private val dragHelper = object : ItemTouchHelper.SimpleCallback(
-		ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
-	) {
-		
-		override fun onMove(
-			recyclerView: RecyclerView,
-			viewHolder: RecyclerView.ViewHolder,
-			target: RecyclerView.ViewHolder
-		): Boolean {
-			val from = viewHolder.bindingAdapterPosition
-			val to = target.bindingAdapterPosition
-			(recyclerView.adapter as? TaskAdapter)?.triggerMove(from, to)
-			return true
-		}
-		
-		override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-			//nothing to do here
-		}
-		
-		override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-			if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) (viewHolder as? ItemTouchViewHolder)?.onItemSelected()
-			super.onSelectedChanged(viewHolder, actionState)
-		}
-		
-		override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-			super.clearView(recyclerView, viewHolder)
-			(viewHolder as? ItemTouchViewHolder)?.onItemClear()
-		}
-		
-		override fun isItemViewSwipeEnabled() = false
-		
-		override fun isLongPressDragEnabled() = true
-	}
 	private val getContent =
 		registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 			if (result.resultCode == RESULT_OK) (result.data?.getSerializableExtra(ACTION) as? Action<*>)?.also(
@@ -128,6 +98,11 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 		registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 			if (result.resultCode == RESULT_OK)
 				populateUI()
+		}
+	
+	private val getDoneActivity =
+		registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+			populateUI()
 		}
 	
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -203,10 +178,13 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 			this,
 			currList.tasks.getOrPut(UNCATEGORIZED, ::ArrayList),
 			UNCATEGORIZED,
-			data.currentList
+			data.currentList,
+			if (currList.markDone) TaskVariants.TODO_MARKABLE else TaskVariants.TODO
 		)
 		ItemTouchHelper(dragHelper).attachToRecyclerView(unspecified)
 		
+		findViewById<AppCompatImageView>(R.id.doneItems).visibility =
+			if (currList.markDone) VISIBLE else INVISIBLE
 		findViewById<LinearLayout>(R.id.categories).removeAllViews()
 		currList.tasks.keys.forEach(this::getOrCreateCategory)
 		
@@ -245,7 +223,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 		addListResult.launch(Intent(this, EditListActivity::class.java))
 	}
 	
-	fun onEditListClick(@SuppressLint("UNUSED_PARAMETER") view: View) {
+	fun onEditListClick(@Suppress("UNUSED_PARAMETER") view: View) {
 		dropDown.visibility = GONE
 		val intent = Intent(this, EditListActivity::class.java)
 		intent.putExtra(LIST_NAME, data(this).currentList)
@@ -263,7 +241,15 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 	
 	fun onDeleteAllClick(@Suppress("UNUSED_PARAMETER") view: View) {
 		val taskCount = taskCount()
-		if (taskCount > 0) DeleteAllDialog().show(supportFragmentManager, "DeleteAllDialog")
+		val delete = !data(this).currentList().markDone
+		if (taskCount > 0)
+			DeleteAllDialog(delete).show(supportFragmentManager, "DeleteAllDialog")
+	}
+	
+	fun onShowDoneClicked(@Suppress("UNUSED_PARAMETER") view: View) {
+		val intent = Intent(this, CompletedTasksActivity::class.java)
+		intent.putExtra(LIST_NAME, data(this).currentList)
+		getDoneActivity.launch(intent)
 	}
 	
 	private fun taskCount(): Int {
@@ -272,14 +258,30 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 	
 	override fun onDialogPositiveClick() {
 		val taskCount = taskCount()
-		
 		event(DeleteAll(taskCount))
-		data(this).currentList().tasks.clear()
-		findViewById<RecyclerView>(R.id.taskList).adapter?.also { @SuppressLint("NotifyDataSetChanged") it.notifyDataSetChanged() }
+		
+		val data = data(this)
+		val currList = data.currentList()
+		if (currList.markDone) {
+			currList.tasks.forEach { catId, cat ->
+				if (cat.isNotEmpty()) {
+					val doneCat = currList.done.getOrPut(catId, ::ArrayList)
+					cat.forEach { doneCat.add(it) }
+				}
+			}
+		}
+		
+		val taskList = findViewById<RecyclerView>(R.id.taskList)
+		(taskList.adapter as? TaskAdapter<*>)?.also {
+			val count = it.itemCount
+			it.tasks.clear()
+			Handler(Looper.getMainLooper()).post{ it.notifyItemRangeRemoved(0, count)}
+		}
+		
+		currList.tasks.clear()
 		
 		val categories = findViewById<LinearLayout>(R.id.categories)
 		categories.removeAllViews()
-		
 	}
 	
 	fun onRestoreClick(@Suppress("UNUSED_PARAMETER") view: View) {
@@ -377,7 +379,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 				)
 				return
 			}
-			(tasksNew.adapter as? TaskAdapter)?.also {
+			(tasksNew.adapter as? TaskAdapter<*>)?.also {
 				it.tasks[action.indNew] = action.descNew
 				it.notifyItemChanged(action.indNew)
 			}
@@ -462,7 +464,13 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 		val currList = data.currentList()
 		
 		val backingList = currList.tasks.getOrPut(categoryId, ::ArrayList)
-		val adapter = TaskAdapter(this, backingList, categoryId, data.currentList)
+		val adapter = TaskAdapter(
+			this,
+			backingList,
+			categoryId,
+			data.currentList,
+			if (currList.markDone) TaskVariants.TODO_MARKABLE else TaskVariants.TODO
+		)
 		
 		val tasks = RecyclerView(applicationContext)
 		val tasksLayout = RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
@@ -484,15 +492,21 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 		
 		val i = if (action.index == -1) tasks.size else action.index.coerceIn(0, tasks.size)
 		
-		(tasks.adapter as? TaskAdapter)?.also {
+		(tasks.adapter as? TaskAdapter<*>)?.also {
 			it.tasks.add(i, action.description)
 			it.notifyItemInserted(i)
+			action.doneIndex?.takeIf { index -> index > -1 }?.also { doneIndex ->
+				data(this).currentList().done[action.category]?.also { category ->
+					if (doneIndex < category.size)
+						category.removeAt(doneIndex)
+				}
+			}
 		} ?: run {
 			Log.w(CREATE_TASK, "Failed to retrieve category from backing data.")
 		}
 	}
 	
-	fun editTask(index: Int, categoryId: Long, description: String) {
+	override fun editTask(index: Int, categoryId: Long, description: String) {
 		val intent = Intent(this, CreateTaskActivity::class.java)
 		intent.putExtra(CATEGORY, categoryId)
 		intent.putExtra(INDEX, index)
@@ -502,9 +516,14 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 	
 	private fun deleteTask(action: DeleteTask) {
 		val tasks = getOrCreateCategory(action.category)
-		(tasks.adapter as? TaskAdapter)?.also {
+		(tasks.adapter as? TaskAdapter<*>)?.also {
 			it.tasks.removeAt(action.index)
 			it.notifyItemRemoved(action.index)
+			action.doneIndex?.also {
+				val currentList = data(this).currentList()
+				val category = currentList.done.getOrPut(action.category, ::ArrayList)
+				category.add(action.description)
+			}
 		}
 	}
 	
@@ -522,12 +541,12 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 			Log.i(MOVE_TASK, "new: ${action.new} is out of range $range")
 			return
 		}
-		(category.adapter as? TaskAdapter)?.moveItem(action.old, action.new, false)
+		(category.adapter as? TaskAdapter<*>)?.moveItem(action.old, action.new, false)
 	}
 	
-	fun event(action: Action<*>) {
+	override fun event(action: Action<*>) {
 		fun addToHistory(action: Action<*>) {
-			history.peek()?.merge(action)?.also {merged ->
+			history.peek()?.merge(action)?.also { merged ->
 				history.remove()
 				if (!merged.isNoop())
 					history.add(merged)
@@ -578,7 +597,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 		updateUI()
 	}
 	
-	fun setItemBG(target: View, pos: Int) {
+	override fun setItemBG(target: View, pos: Int) {
 		target.setBackgroundColor(if (pos % 2 == 1) rowOddColor.data else rowEvenColor.data)
 	}
 	
@@ -603,14 +622,5 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener {
 		
 		findViewById<ImageButton>(R.id.restoreButton).visibility =
 			if (history.isEmpty()) GONE else VISIBLE
-	}
-	
-	private fun setAnimatorDurations(animator: RecyclerView.ItemAnimator?) {
-		animator?.apply {
-			addDuration = 50
-			removeDuration = 50
-			moveDuration = 50
-			changeDuration = 30
-		}
 	}
 }

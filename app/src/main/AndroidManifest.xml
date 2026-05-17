@@ -41,6 +41,11 @@
             android:label="@string/title_activity_edit_checklist"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
         <activity
+            android:name=".CompletedTasksActivity"
+            android:exported="false"
+            android:label="@string/title_activity_done_tasks"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/title_activity_main"

@@ -16,7 +16,9 @@ object Constants
     const val MOVE_TASK = "MOVE TASK"
 
     const val MSG_DELETE_ALL_TASKS = "Delete all Tasks?"
+    const val MSG_MARK_ALL_DONE = "Mark all Tasks as done?"
     const val TEXT_DELETE = "Delete"
+    const val TEXT_OK = "Ok"
     const val TEXT_CANCEL = "Cancel"
 
     const val ACTION = "ACTION"

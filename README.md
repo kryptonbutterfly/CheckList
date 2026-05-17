@@ -5,12 +5,14 @@
 A primitive checklist app.
 
 <div>
-    <img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_CheckList.webp" alt="Tasks activity" width="200"/>
+    <img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_TaskList.webp" alt="Task activity variant issues" width="200"/>
     <img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_Create_List.webp" alt="Create new List activity" width="200"/>
+    <img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_CheckList.webp" alt="Tasks activity" width="200"/>
+    <img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_Completed.webp" alt="Completed issues activity" width="200"/>
     <img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_Edit_Task.webp" alt="Edit Tasks activity" width="200"/>
     <img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_Create_Category.webp" alt="Create category activity" width="200"/>
     <img src="https://raw.githubusercontent.com/kryptonbutterfly/CheckList/master/md/Screenshot_Settings.webp" alt="Settings activity" width="200"/>
 </div>
 
 ## Download
-[CheckList.apk](https://github.com/kryptonbutterfly/CheckList/releases/download/v4.1.9/CheckList.apk)
+[CheckList.apk](https://github.com/kryptonbutterfly/CheckList/releases/download/v4.2.0/CheckList.apk)

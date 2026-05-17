@@ -35,9 +35,16 @@
     <string name="button_export_md">Export .md</string>
     <string name="text_input_hint_ListName">List name</string>
     <string name="title_activity_edit_checklist">EditCheckList</string>
+    <string name="title_activity_done_tasks">DoneTasks</string>
     <string name="button_import_md">Import .md</string>
     <string name="importTitle">Import</string>
     <string name="switchTrackSkipTitle">skip duplicate Tasks</string>
     <string name="button_delete_task">delete Task</string>
     <string name="button_edit_list">Edit List</string>
+    <string name="track_tasks_done_title">Remember completed Tasks</string>
+    <string name="button_todo">mark todo</string>
+    <string name="button_back_to_todo">back to tasks</string>
+    <string name="button_done_tasks">show done tasks</string>
+    <string name="button_menu">menu</string>
+    <string name="textCompleted">Completed</string>
 </resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="2dp"
+    android:viewportWidth="32"
+    android:viewportHeight="2">
+    <path
+        android:name="category"
+        android:fillColor="?attr/icon_color"
+        android:pathData="
+        m10.5,0
+        a0.5,0.5 0 0,0 -0.5,0.5
+        v1
+        a0.5,0.5 0 0,0 0.5,0.5
+        h1
+        a0.5,0.5 0 0,0 0.5,-0.5
+        v-1
+        a0.5,0.5 0 0,0 -0.5,-0.5
+        m2,1
+        a0.5,0.5 0 0,0 0,1h8a0.5,0.5 0 0,0 0,-1Z"/>
+</vector>

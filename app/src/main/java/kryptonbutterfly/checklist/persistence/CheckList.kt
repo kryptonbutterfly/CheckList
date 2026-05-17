@@ -13,7 +13,9 @@ import java.util.LinkedList
 
 data class CheckList(
 	@Expose val tasks: HashMap<Long, ArrayList<String>> = HashMap(),
-	@Expose var history: LinkedList<Action<*>> = LinkedList()
+	@Expose val done: HashMap<Long, ArrayList<String>> = HashMap(),
+	@Expose var history: LinkedList<Action<*>> = LinkedList(),
+	@Expose var markDone: Boolean = false
 ) : Serializable {
 	fun addTask(categoryId: Long, descriptor: String, index: Int) {
 		val categoryTasks = tasks[categoryId]
@@ -36,6 +38,10 @@ data class CheckList(
 		tasks.entries.removeIf {
 			it.value.isEmpty() && it.key != UNCATEGORIZED
 		}
+		
+		done.entries.removeIf {
+			it.value.isEmpty() && it.key != UNCATEGORIZED
+		}
 	}
 	
 	/**
@@ -44,6 +50,10 @@ data class CheckList(
 	 */
 	fun removeUsedCategoriesFromSet(unusedCategories: HashSet<Long>) {
 		tasks.entries.forEach {
+			if (it.value.isNotEmpty())
+				unusedCategories.remove(it.key)
+		}
+		done.entries.forEach {
 			if (it.value.isNotEmpty())
 				unusedCategories.remove(it.key)
 		}

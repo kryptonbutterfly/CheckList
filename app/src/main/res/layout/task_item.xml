@@ -23,19 +23,38 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
+            android:id="@+id/buttonNotDone"
+            android:layout_width="36dp"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/button_todo"
+            android:foregroundGravity="center_vertical"
+            android:minWidth="32dp"
+            android:paddingHorizontal="2dp"
+            android:paddingVertical="2dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/taskText"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/checked_box"
+            tools:ignore="TouchTargetSizeCheck"
+            tools:visibility="visible" />
+
+        <ImageButton
             android:id="@+id/deleteButton"
-            android:layout_width="48dp"
+            android:layout_width="36dp"
             android:layout_height="0dp"
             android:background="@android:color/transparent"
             android:contentDescription="@string/button_delete_task"
             android:foregroundGravity="center_vertical"
-            android:minHeight="32dp"
-            android:paddingHorizontal="6dp"
+            android:minWidth="32dp"
+            android:paddingHorizontal="2dp"
             android:paddingVertical="2dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@android:drawable/ic_menu_delete"
             tools:ignore="TouchTargetSizeCheck" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

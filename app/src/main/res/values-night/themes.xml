@@ -24,9 +24,15 @@
         <item name="icon_border_color">@color/Gray10</item>
         <item name="icon_color">@color/Gray70</item>
 
+        <item name="checkMark_color">@color/light_blue</item>
+        <item name="checkMark_shadow_color">@android:color/transparent</item>
+
         <item name="itemGlowColor">?android:attr/colorActivatedHighlight</item>
 
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+
+        <item name="circleButtonWidth">48dp</item>
+        <item name="circleButtonHeight">48dp</item>
     </style>
 </resources>

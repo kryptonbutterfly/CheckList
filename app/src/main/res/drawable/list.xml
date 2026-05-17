@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/list_bg"/>
+    <item
+        android:drawable="@drawable/category_line"
+        android:top="7dp"
+        android:height="2dp"/>
+    <item
+        android:drawable="@drawable/task_line"
+        android:top="10dp"
+        android:height="1dp"/>
+    <item
+        android:drawable="@drawable/task_line"
+        android:top="12dp"
+        android:height="1dp"/>
+    <item
+        android:drawable="@drawable/category_line"
+        android:top="14dp"
+        android:height="2dp"/>
+    <item
+        android:drawable="@drawable/task_line"
+        android:top="17dp"
+        android:height="1dp"/>
+    <item
+        android:drawable="@drawable/task_line"
+        android:top="19dp"
+        android:height="1dp"/>
+    <item
+        android:drawable="@drawable/category_line"
+        android:top="21dp"
+        android:height="2dp"/>
+    <item
+        android:drawable="@drawable/task_line"
+        android:top="24dp"
+        android:height="1dp"/>
+</layer-list>

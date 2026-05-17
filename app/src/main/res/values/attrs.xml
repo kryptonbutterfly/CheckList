@@ -10,4 +10,8 @@
     <attr name="icon_border_color" format="color"/>
     <attr name="icon_color" format="color"/>
     <attr name="itemGlowColor" format="color"/>
+    <attr name="checkMark_color" format="color"/>
+    <attr name="checkMark_shadow_color" format="color"/>
+    <attr name="circleButtonWidth" format="dimension"/>
+    <attr name="circleButtonHeight" format="dimension"/>
 </resources>
