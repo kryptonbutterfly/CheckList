@@ -5,10 +5,12 @@ import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -27,8 +29,9 @@ class TaskAdapter<E>(
 	val tasks: ArrayList<String>,
 	private val category: Long,
 	private val listName: String,
-	private val variant: TaskVariants): RecyclerView.Adapter<TaskAdapter.ViewHolder>() where E: Context, E: HistoryActivity {
-	class ViewHolder(view: View): RecyclerView.ViewHolder(view), ItemTouchViewHolder {
+	private val variant: TaskVariants
+) : RecyclerView.Adapter<TaskAdapter.ViewHolder>() where E : Context, E : HistoryActivity {
+	class ViewHolder(view: View) : RecyclerView.ViewHolder(view), ItemTouchViewHolder {
 		val taskText: TextView = view.findViewById(R.id.taskText)
 		val restoreButton: ImageButton = view.findViewById(R.id.buttonNotDone)
 		val deleteButton: ImageButton = view.findViewById(R.id.deleteButton)
@@ -61,10 +64,16 @@ class TaskAdapter<E>(
 	override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 		holder.taskText.text = tasks[position]
 		holder.taskText.setOnClickListener {
-			context.editTask(holder.bindingAdapterPosition, category, holder.taskText.text.toString())
+			context.editTask(
+				holder.bindingAdapterPosition,
+				category,
+				holder.taskText.text.toString()
+			)
 		}
+		
 		if (variant == TaskVariants.TODO_MARKABLE)
-			context.getDrawable(R.drawable.unchecked_box)?.also { holder.deleteButton.setImageDrawable(it) }
+			AppCompatResources.getDrawable(context, R.drawable.unchecked_box)
+				?.also { holder.deleteButton.setImageDrawable(it) }
 		
 		holder.deleteButton.setOnClickListener {
 			val list = data(context).currentList()
@@ -72,18 +81,26 @@ class TaskAdapter<E>(
 			
 			val desc = holder.taskText.text.toString()
 			val currIndex = holder.bindingAdapterPosition
-			context.event(if (variant == TaskVariants.DONE)
-				DeleteTask(desc, listName, category, -1, currIndex)
-			else DeleteTask(desc, listName, category, currIndex, doneIndex))
+			context.event(
+				if (variant == TaskVariants.DONE)
+					DeleteTask(desc, listName, category, -1, currIndex)
+				else DeleteTask(desc, listName, category, currIndex, doneIndex)
+			)
 		}
 		
-		if (variant == TaskVariants.DONE) {
-			holder.restoreButton.visibility = VISIBLE
+		holder.restoreButton.visibility = if (variant == TaskVariants.DONE) VISIBLE else GONE
+		if (variant == TaskVariants.DONE)
 			holder.restoreButton.setOnClickListener {
-				context.event(CreateTask(holder.taskText.text.toString(), listName, category, -1, holder.bindingAdapterPosition))
+				context.event(
+					CreateTask(
+						holder.taskText.text.toString(),
+						listName,
+						category,
+						-1,
+						holder.bindingAdapterPosition
+					)
+				)
 			}
-		}
-		
 		context.setItemBG(holder.itemView, position)
 	}
 	
