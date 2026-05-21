@@ -47,4 +47,5 @@
     <string name="button_done_tasks">show done tasks</string>
     <string name="button_menu">menu</string>
     <string name="textCompleted">Completed</string>
+    <string name="button_delete_list">Delete List</string>
 </resources>

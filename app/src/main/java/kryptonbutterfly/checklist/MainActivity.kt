@@ -1,5 +1,6 @@
 package kryptonbutterfly.checklist
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
@@ -42,19 +43,26 @@ import kryptonbutterfly.checklist.Constants.CATEGORY_TITLE_INDEX
 import kryptonbutterfly.checklist.Constants.CHANGE_TASK
 import kryptonbutterfly.checklist.Constants.LIST_NAME
 import kryptonbutterfly.checklist.Constants.MOVE_TASK
+import kryptonbutterfly.checklist.Constants.MSG_DELETE_ALL_TASKS
+import kryptonbutterfly.checklist.Constants.MSG_DELETE_LIST
+import kryptonbutterfly.checklist.Constants.MSG_MARK_ALL_DONE
 import kryptonbutterfly.checklist.Constants.TASKS_INDEX
+import kryptonbutterfly.checklist.Constants.TEXT_CANCEL
+import kryptonbutterfly.checklist.Constants.TEXT_DELETE
+import kryptonbutterfly.checklist.Constants.TEXT_OK
 import kryptonbutterfly.checklist.Constants.UNCATEGORIZED
 import kryptonbutterfly.checklist.actions.*
 import kryptonbutterfly.checklist.misc.Stack
 import kryptonbutterfly.checklist.misc.dragHelper
 import kryptonbutterfly.checklist.misc.setAnimatorDurations
 import kryptonbutterfly.checklist.persistence.*
+import kryptonbutterfly.checklist.ui.SimpleConfirmDialog
 import kryptonbutterfly.checklist.ui.TaskAdapter
 import kryptonbutterfly.checklist.ui.TaskVariants
 
 const val REQUEST_PERMISSION_CODE = 0
 
-class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener, HistoryActivity {
+class MainActivity : AppCompatActivity(), HistoryActivity {
 	private val rowOddColor = TypedValue()
 	private val rowEvenColor = TypedValue()
 	private lateinit var dropDown: CardView
@@ -217,7 +225,18 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener, Histor
 		val intent = Intent(this, SettingsActivity::class.java)
 		settingsResult.launch(intent)
 	}
-	
+	fun onDeleteListClick(@Suppress("UNUSED_PARAMETER") view: View) {
+		dropDown.visibility = GONE
+		val data = data(this)
+		SimpleConfirmDialog {
+			AlertDialog.Builder(it).setMessage(MSG_DELETE_LIST.format(data.currentList))
+				.setPositiveButton(TEXT_DELETE) { _, _ ->
+					data.deleteCurrentList()
+					populateUI()
+				}.setNegativeButton(TEXT_CANCEL) { _, _ -> }
+				.create()
+		}.show(supportFragmentManager, "DeleteListDialog")
+	}
 	fun onAddListClick(@Suppress("UNUSED_PARAMETER") view: View) {
 		dropDown.visibility = GONE
 		addListResult.launch(Intent(this, EditListActivity::class.java))
@@ -243,7 +262,12 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener, Histor
 		val taskCount = taskCount()
 		val delete = !data(this).currentList().markDone
 		if (taskCount > 0)
-			DeleteAllDialog(delete).show(supportFragmentManager, "DeleteAllDialog")
+			SimpleConfirmDialog {
+				AlertDialog.Builder(it).setMessage(if (delete) MSG_DELETE_ALL_TASKS else MSG_MARK_ALL_DONE)
+					.setPositiveButton(if (delete) TEXT_DELETE else TEXT_OK) { _, _ -> deleteAllTasks() }
+					.setNegativeButton(TEXT_CANCEL) { _, _ -> }
+					.create()
+			}.show(supportFragmentManager, "DeleteAllDialog")
 	}
 	
 	fun onShowDoneClicked(@Suppress("UNUSED_PARAMETER") view: View) {
@@ -256,7 +280,7 @@ class MainActivity : AppCompatActivity(), DeleteAllDialog.DialogListener, Histor
 		return data(this).currentList().tasks.values.stream().mapToInt { tasks -> tasks.size }.sum()
 	}
 	
-	override fun onDialogPositiveClick() {
+	private fun deleteAllTasks() {
 		val taskCount = taskCount()
 		event(DeleteAll(taskCount))
 		

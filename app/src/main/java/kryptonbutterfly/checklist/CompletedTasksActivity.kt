@@ -1,5 +1,6 @@
 package kryptonbutterfly.checklist
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -25,7 +26,10 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kryptonbutterfly.checklist.Constants.MOVE_TASK
+import kryptonbutterfly.checklist.Constants.MSG_DELETE_ALL_TASKS
 import kryptonbutterfly.checklist.Constants.TASKS_INDEX
+import kryptonbutterfly.checklist.Constants.TEXT_CANCEL
+import kryptonbutterfly.checklist.Constants.TEXT_DELETE
 import kryptonbutterfly.checklist.Constants.UNCATEGORIZED
 import kryptonbutterfly.checklist.actions.Action
 import kryptonbutterfly.checklist.actions.CreateTask
@@ -35,10 +39,11 @@ import kryptonbutterfly.checklist.misc.dragHelper
 import kryptonbutterfly.checklist.misc.setAnimatorDurations
 import kryptonbutterfly.checklist.persistence.cache
 import kryptonbutterfly.checklist.persistence.data
+import kryptonbutterfly.checklist.ui.SimpleConfirmDialog
 import kryptonbutterfly.checklist.ui.TaskAdapter
 import kryptonbutterfly.checklist.ui.TaskVariants
 
-class CompletedTasksActivity: AppCompatActivity(), DeleteAllDialog.DialogListener, HistoryActivity {
+class CompletedTasksActivity: AppCompatActivity(), HistoryActivity {
 	private val rowOddColor = TypedValue()
 	private val rowEvenColor = TypedValue()
 	private lateinit var textListName: TextView
@@ -147,7 +152,7 @@ class CompletedTasksActivity: AppCompatActivity(), DeleteAllDialog.DialogListene
 		ItemTouchHelper(dragHelper).attachToRecyclerView(tasks)
 		return tasks
 	}
-	override fun onDialogPositiveClick() {
+	private fun onDialogPositiveClick() {
 		Log.i("DONE", "delete all done Tasks")
 		
 		val currList = data(this).currentList()
@@ -246,7 +251,12 @@ class CompletedTasksActivity: AppCompatActivity(), DeleteAllDialog.DialogListene
 	}
 	fun deleteAllClicked(@Suppress("UNUSED_PARAMETER") view: View) {
 		if (taskCount() > 0)
-			DeleteAllDialog(true).show(supportFragmentManager, "DeleteAllDialog")
+			SimpleConfirmDialog {
+				AlertDialog.Builder(it).setMessage(MSG_DELETE_ALL_TASKS)
+					.setPositiveButton(TEXT_DELETE) { _, _ -> onDialogPositiveClick() }
+					.setNegativeButton(TEXT_CANCEL) { _, _ -> }
+					.create()
+			}.show(supportFragmentManager, "DeleteAllDialog")
 	}
 	fun backToTasks(@Suppress("UNUSED_PARAMETER") view: View) {
 		Log.i("DONE", "back to Tasks")

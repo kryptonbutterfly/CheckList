@@ -16,6 +16,7 @@ object Constants
     const val MOVE_TASK = "MOVE TASK"
 
     const val MSG_DELETE_ALL_TASKS = "Delete all Tasks?"
+    const val MSG_DELETE_LIST = "Delete List '%s'?"
     const val MSG_MARK_ALL_DONE = "Mark all Tasks as done?"
     const val TEXT_DELETE = "Delete"
     const val TEXT_OK = "Ok"
@@ -30,7 +31,8 @@ object Constants
 
     const val JSON_TYPE = ":type"
     const val JSON_DATA = "data"
-
+    const val FALLBACK_LIST_NAME = "Default"
+    
     val GSON: Gson = GsonBuilder()
         .setPrettyPrinting()
         .registerTypeAdapter(Action::class.java, ActionAdapter)
