@@ -69,6 +69,7 @@ class MainActivity : AppCompatActivity(), HistoryActivity {
 	private lateinit var spinnerList: Spinner
 	private lateinit var listsAdapter: ArrayAdapter<String>
 	private lateinit var history: Stack<Action<*>>
+	private lateinit var taskAdapter: TaskAdapter<MainActivity>
 	private val getContent =
 		registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 			if (result.resultCode == RESULT_OK) (result.data?.getSerializableExtra(ACTION) as? Action<*>)?.also(
@@ -141,6 +142,16 @@ class MainActivity : AppCompatActivity(), HistoryActivity {
 			
 			override fun onNothingSelected(p0: AdapterView<*>?) {}
 		}
+		val unspecified = findViewById<RecyclerView>(R.id.taskList)
+		this.taskAdapter = TaskAdapter(
+			this,
+			ArrayList(),
+			UNCATEGORIZED,
+			"",
+			TaskVariants.TODO_MARKABLE
+		)
+		unspecified.adapter = this.taskAdapter
+		ItemTouchHelper(dragHelper).attachToRecyclerView(unspecified)
 		
 		setAnimatorDurations(findViewById<RecyclerView>(R.id.taskList).itemAnimator)
 	}
@@ -181,15 +192,11 @@ class MainActivity : AppCompatActivity(), HistoryActivity {
 		spinnerList.invalidate()
 		spinnerList.setSelection(listsAdapter.getPosition(data.currentList))
 		
-		val unspecified = findViewById<RecyclerView>(R.id.taskList)
-		unspecified.adapter = TaskAdapter(
-			this,
-			currList.tasks.getOrPut(UNCATEGORIZED, ::ArrayList),
-			UNCATEGORIZED,
-			data.currentList,
-			if (currList.markDone) TaskVariants.TODO_MARKABLE else TaskVariants.TODO
-		)
-		ItemTouchHelper(dragHelper).attachToRecyclerView(unspecified)
+		taskAdapter.tasks = currList.tasks.getOrPut(UNCATEGORIZED, ::ArrayList)
+		taskAdapter.listName = data.currentList
+		taskAdapter.variant = if (currList.markDone) TaskVariants.TODO_MARKABLE else TaskVariants.TODO
+		
+		taskAdapter.rebind(findViewById(R.id.taskList))
 		
 		findViewById<AppCompatImageView>(R.id.doneItems).visibility =
 			if (currList.markDone) VISIBLE else INVISIBLE

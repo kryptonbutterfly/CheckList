@@ -26,16 +26,15 @@ private const val ANIMATION_DURATION: Long = 50
 
 class TaskAdapter<E>(
 	private val context: E,
-	val tasks: ArrayList<String>,
+	var tasks: ArrayList<String>,
 	private val category: Long,
-	private val listName: String,
-	private val variant: TaskVariants
+	var listName: String,
+	var variant: TaskVariants
 ) : RecyclerView.Adapter<TaskAdapter.ViewHolder>() where E : Context, E : HistoryActivity {
 	class ViewHolder(view: View) : RecyclerView.ViewHolder(view), ItemTouchViewHolder {
 		val taskText: TextView = view.findViewById(R.id.taskText)
 		val restoreButton: ImageButton = view.findViewById(R.id.buttonNotDone)
 		val deleteButton: ImageButton = view.findViewById(R.id.deleteButton)
-		
 		private val itemGlow = ContextCompat.getDrawable(view.context, R.drawable.item_glow)
 		
 		override fun onItemSelected() {
@@ -56,8 +55,7 @@ class TaskAdapter<E>(
 	}
 	
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-		val view = LayoutInflater.from(context)
-			.inflate(R.layout.task_item, parent, false)
+		val view = LayoutInflater.from(context).inflate(R.layout.task_item, parent, false)
 		return ViewHolder(view)
 	}
 	
@@ -65,15 +63,13 @@ class TaskAdapter<E>(
 		holder.taskText.text = tasks[position]
 		holder.taskText.setOnClickListener {
 			context.editTask(
-				holder.bindingAdapterPosition,
-				category,
-				holder.taskText.text.toString()
+				holder.bindingAdapterPosition, category, holder.taskText.text.toString()
 			)
 		}
 		
-		if (variant == TaskVariants.TODO_MARKABLE)
-			AppCompatResources.getDrawable(context, R.drawable.unchecked_box)
-				?.also { holder.deleteButton.setImageDrawable(it) }
+		if (variant == TaskVariants.TODO_MARKABLE) AppCompatResources.getDrawable(
+			context, R.drawable.unchecked_box
+		)?.also { holder.deleteButton.setImageDrawable(it) }
 		
 		holder.deleteButton.setOnClickListener {
 			val list = data(context).currentList()
@@ -82,25 +78,25 @@ class TaskAdapter<E>(
 			val desc = holder.taskText.text.toString()
 			val currIndex = holder.bindingAdapterPosition
 			context.event(
-				if (variant == TaskVariants.DONE)
-					DeleteTask(desc, listName, category, -1, currIndex)
+				if (variant == TaskVariants.DONE) DeleteTask(
+					desc, listName, category, -1, currIndex
+				)
 				else DeleteTask(desc, listName, category, currIndex, doneIndex)
 			)
 		}
 		
 		holder.restoreButton.visibility = if (variant == TaskVariants.DONE) VISIBLE else GONE
-		if (variant == TaskVariants.DONE)
-			holder.restoreButton.setOnClickListener {
-				context.event(
-					CreateTask(
-						holder.taskText.text.toString(),
-						listName,
-						category,
-						-1,
-						holder.bindingAdapterPosition
-					)
+		if (variant == TaskVariants.DONE) holder.restoreButton.setOnClickListener {
+			context.event(
+				CreateTask(
+					holder.taskText.text.toString(),
+					listName,
+					category,
+					-1,
+					holder.bindingAdapterPosition
 				)
-			}
+			)
+		}
 		context.setItemBG(holder.itemView, position)
 	}
 	
@@ -111,12 +107,18 @@ class TaskAdapter<E>(
 		Log.d("move Item", "moving item from $from to $to")
 		Collections.swap(tasks, from, to)
 		notifyItemMoved(from, to)
-		if (trackChange)
-			context.event(MoveTask(from, to, "", category, listName))
+		if (trackChange) context.event(MoveTask(from, to, "", category, listName))
 	}
 	
 	fun triggerMove(from: Int, to: Int) {
 		if (from == to) return
 		context.event(MoveTask(from, to, tasks[from], category, listName))
+	}
+	
+	fun rebind(recycler: RecyclerView) {
+		recycler.adapter = null
+		recycler.recycledViewPool.clear()
+		recycler.adapter = this
+		notifyDataSetChanged()
 	}
 }
