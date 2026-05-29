@@ -60,7 +60,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:gravity="start"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="12dp"
                     android:paddingVertical="4dp"
                     android:text="@string/textCompleted"
                     android:textSize="16sp"

@@ -331,10 +331,13 @@ class MainActivity : AppCompatActivity(), HistoryActivity {
 	}
 	
 	private fun openFilePicker() {
-		val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-		intent.addCategory(Intent.CATEGORY_OPENABLE)
-		intent.type = "text/markdown"
-		intent.putExtra(Intent.EXTRA_TITLE, "${data(this).currentList}.md")
+		val fileName = "${data(this).currentList}.md"
+		val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+			type = "text/markdown"
+			addCategory(Intent.CATEGORY_OPENABLE)
+			putExtra(Intent.EXTRA_TITLE, fileName)
+			flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+		}
 		getExport.launch(intent)
 	}
 	
