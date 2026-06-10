@@ -55,15 +55,21 @@ class CreateTaskActivity : ComponentActivity() {
         items.add(SpinnerIconItem(null, "", UNCATEGORIZED))
         val data = data(this)
         val cache = cache(this)
+        val currList = data.currentList()
         
         var categoryIndex = 0
-        data.categories.values.forEachIndexed { i, cat ->
-            addCategory(cache, cat)
-            if (cat.id == categoryId)
-                categoryIndex = i + 1
-        }
+        
+        var counter = 0
+        for (cat in data.categories.values)
+            if (cat.id == categoryId || currList.visCategories?.contains(cat.id)?:true) {
+                counter++
+                addCategory(cache, cat)
+                if (cat.id == categoryId)
+                    categoryIndex = counter
+            }
         
         val spinner = findViewById<Spinner>(R.id.spinnerCategories)
+        
         spinner.adapter = SpinnerIconAdapter(this, items)
         spinner.setSelection(categoryIndex)
     }

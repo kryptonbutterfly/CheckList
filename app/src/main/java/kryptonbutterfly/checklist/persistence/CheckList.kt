@@ -15,7 +15,8 @@ data class CheckList(
 	@Expose val tasks: HashMap<Long, ArrayList<String>> = HashMap(),
 	@Expose val done: HashMap<Long, ArrayList<String>> = HashMap(),
 	@Expose var history: LinkedList<Action<*>> = LinkedList(),
-	@Expose var markDone: Boolean = false
+	@Expose var markDone: Boolean = false,
+	@Expose var visCategories: HashSet<Long>? = null
 ) : Serializable {
 	fun addTask(categoryId: Long, descriptor: String, index: Int) {
 		val categoryTasks = tasks[categoryId]
@@ -71,6 +72,4 @@ data class CheckList(
 			}
 		}
 	}
-	
-	fun isEmpty(): Boolean = tasks.values.firstOrNull { !it.isEmpty() } == null
 }
