@@ -29,5 +29,5 @@ private fun scaleIncrement(source: Bitmap, width: Int, height: Int): Bitmap {
 	val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
 	paint.isDither = true
 	canvas.drawBitmap(source, null, Rect(0, 0, width, height), paint)
-	return result;
+	return result
 }

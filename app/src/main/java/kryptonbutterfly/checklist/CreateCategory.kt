@@ -6,9 +6,12 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.ViewCompat
 import com.google.android.material.textfield.TextInputEditText
 import kryptonbutterfly.checklist.Constants.CATEGORY
+import kryptonbutterfly.checklist.misc.WindowInsetsAdapter
 import kryptonbutterfly.checklist.persistence.Category
 import kryptonbutterfly.checklist.persistence.cache
 import kryptonbutterfly.checklist.persistence.data
@@ -37,7 +40,10 @@ class CreateCategory : ComponentActivity() {
 	
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+		enableEdgeToEdge()
 		setContentView(R.layout.activity_create_category)
+		val root = findViewById<View>(R.id.createCategoryRoot)
+		ViewCompat.setOnApplyWindowInsetsListener(root, WindowInsetsAdapter())
 	}
 	
 	fun onApply(@Suppress("UNUSED_PARAMETER") view: View) {

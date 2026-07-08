@@ -1,9 +1,29 @@
 package kryptonbutterfly.checklist.misc
 
+import android.view.View
+import androidx.core.view.OnApplyWindowInsetsListener
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import kryptonbutterfly.checklist.ui.ItemTouchViewHolder
 import kryptonbutterfly.checklist.ui.TaskAdapter
+
+class WindowInsetsAdapter: OnApplyWindowInsetsListener {
+	override fun onApplyWindowInsets(
+		v: View,
+		insets: WindowInsetsCompat
+	): WindowInsetsCompat {
+		val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+		val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+		v.setPadding(
+			v.paddingLeft,
+			v.paddingTop,
+			v.paddingRight,
+			maxOf(ime.bottom, bars.bottom)
+		)
+		return insets
+	}
+}
 
 fun setAnimatorDurations(animator: RecyclerView.ItemAnimator?) {
 	animator?.apply {

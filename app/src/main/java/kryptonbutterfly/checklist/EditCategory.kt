@@ -6,8 +6,11 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
+import androidx.core.view.ViewCompat
 import com.google.android.material.textfield.TextInputEditText
 import kryptonbutterfly.checklist.Constants.CATEGORY
+import kryptonbutterfly.checklist.misc.WindowInsetsAdapter
 import kryptonbutterfly.checklist.persistence.Category
 import kryptonbutterfly.checklist.persistence.cache
 import kryptonbutterfly.checklist.persistence.data
@@ -17,7 +20,12 @@ class EditCategory : ComponentActivity() {
 	
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+		enableEdgeToEdge()
 		setContentView(R.layout.activity_edit_category)
+		
+		val root = findViewById<View>(R.id.editCategoryRoot)
+		ViewCompat.setOnApplyWindowInsetsListener(root, WindowInsetsAdapter())
+		
 		val categoryId = intent.getLongExtra(CATEGORY, Constants.UNCATEGORIZED)
 		val data = data(this)
 		data.categories[categoryId]?.also { category ->

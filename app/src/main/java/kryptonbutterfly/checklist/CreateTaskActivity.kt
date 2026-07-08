@@ -7,7 +7,9 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Spinner
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.ViewCompat
 import com.google.android.material.textfield.TextInputEditText
 import kryptonbutterfly.checklist.Constants.ACTION
 import kryptonbutterfly.checklist.Constants.CATEGORY
@@ -17,6 +19,7 @@ import kryptonbutterfly.checklist.Constants.INDEX
 import kryptonbutterfly.checklist.Constants.UNCATEGORIZED
 import kryptonbutterfly.checklist.actions.ChangeTask
 import kryptonbutterfly.checklist.actions.CreateTask
+import kryptonbutterfly.checklist.misc.WindowInsetsAdapter
 import kryptonbutterfly.checklist.persistence.Category
 import kryptonbutterfly.checklist.persistence.IconCache
 import kryptonbutterfly.checklist.persistence.cache
@@ -33,7 +36,13 @@ class CreateTaskActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_create_task)
+        
+        val root = findViewById<View>(R.id.createTaskRoot)
+        ViewCompat.setOnApplyWindowInsetsListener(root, WindowInsetsAdapter())
+        
+        
         val taskDescription = findViewById<TextInputEditText>(R.id.categoryName)
         
         this.description = intent.getStringExtra(DESCRIPTION)

@@ -12,12 +12,15 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
 import androidx.core.view.children
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputEditText
 import kryptonbutterfly.checklist.Constants.LIST_NAME
+import kryptonbutterfly.checklist.misc.WindowInsetsAdapter
 import kryptonbutterfly.checklist.persistence.Category
 import kryptonbutterfly.checklist.persistence.CheckList
 import kryptonbutterfly.checklist.persistence.cache
@@ -36,7 +39,10 @@ class EditListActivity : ComponentActivity() {
 	
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+		enableEdgeToEdge()
 		setContentView(R.layout.activity_edit_list)
+		val root = findViewById<View>(R.id.editListRoot)
+		ViewCompat.setOnApplyWindowInsetsListener(root, WindowInsetsAdapter())
 		
 		buttonEditListAccept = findViewById(R.id.buttonEditListAccept)
 		listNameInput = findViewById(R.id.listName)
