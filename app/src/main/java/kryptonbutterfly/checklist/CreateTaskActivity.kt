@@ -28,8 +28,8 @@ import kryptonbutterfly.checklist.ui.SpinnerIconAdapter
 import kryptonbutterfly.checklist.ui.SpinnerIconItem
 
 
-private var lastCategoryId: Long = UNCATEGORIZED
 class CreateTaskActivity : ComponentActivity() {
+    private val items = ArrayList<SpinnerIconItem>()
     private var description: String? = null
     private var categoryId: Long = UNCATEGORIZED
     private var index: Int = -1
@@ -42,18 +42,20 @@ class CreateTaskActivity : ComponentActivity() {
         val root = findViewById<View>(R.id.createTaskRoot)
         ViewCompat.setOnApplyWindowInsetsListener(root, WindowInsetsAdapter())
         
+        val data = data(this)
+        val currList = data.currentList()
         
         val taskDescription = findViewById<TextInputEditText>(R.id.categoryName)
         
         this.description = intent.getStringExtra(DESCRIPTION)
         this.description?.also(taskDescription::setText)?:
         also {
-            this.categoryId = lastCategoryId
+            if (currList.visCategories?.contains(currList.lastCategory)?:false)
+                this.categoryId = currList.lastCategory
         }
         if (intent.hasExtra(CATEGORY))
             this.categoryId = intent.getLongExtra(CATEGORY, Long.MAX_VALUE)
         this.index = intent.getIntExtra(INDEX, -1)
-        
 
         taskDescription.requestFocus()
         taskDescription.postDelayed({
@@ -62,9 +64,7 @@ class CreateTaskActivity : ComponentActivity() {
         }, 0)
         
         items.add(SpinnerIconItem(null, "", UNCATEGORIZED))
-        val data = data(this)
         val cache = cache(this)
-        val currList = data.currentList()
         
         var categoryIndex = 0
         
@@ -83,8 +83,6 @@ class CreateTaskActivity : ComponentActivity() {
         spinner.setSelection(categoryIndex)
     }
     
-    private val items = ArrayList<SpinnerIconItem>()
-    
     private fun addCategory(cache: IconCache, category: Category) {
         val icon = cache.iconMap[category.icon]
         items.add(SpinnerIconItem(icon, category.name, category.id))
@@ -96,6 +94,7 @@ class CreateTaskActivity : ComponentActivity() {
         val categories = findViewById<Spinner>(R.id.spinnerCategories)
         
         val data = data(this)
+        val currList = data.currentList()
         
         val result = Intent()
 
@@ -104,14 +103,14 @@ class CreateTaskActivity : ComponentActivity() {
         if (description != null) {
             val descOld = description as String
             if (catNew == categoryId) {
-                lastCategoryId = catNew
+                currList.lastCategory = catNew
                 result.putExtra(ACTION, ChangeTask(descOld, categoryId, index, text, catNew, index, data.currentList))
                 setResult(RESULT_OK, result)
                 finish()
                 return
             } else {
                 val indNew = data.currentList().tasks[catNew]?.size ?: 0
-                lastCategoryId = catNew
+                currList.lastCategory = catNew
                 result.putExtra(
                     ACTION,
                     ChangeTask(descOld, categoryId, index, text, catNew, indNew, data.currentList)
@@ -121,7 +120,7 @@ class CreateTaskActivity : ComponentActivity() {
                 return
             }
         }  else {
-            lastCategoryId = catNew
+            currList.lastCategory = catNew
             result.putExtra(ACTION, CreateTask(text, data.currentList, catNew, index))
             setResult(RESULT_OK, result)
             finish()
@@ -142,6 +141,7 @@ class CreateTaskActivity : ComponentActivity() {
                 also { cat ->
                     val data = data(this)
                     data.categories.put(cat.id, cat)
+                    data.currentList().visCategories?.add(cat.id)
                     addCategory(cache(this), cat)
                     val categories = findViewById<Spinner>(R.id.spinnerCategories)
                     categories.setSelection(items.size - 1)

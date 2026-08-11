@@ -16,7 +16,8 @@ data class CheckList(
 	@Expose val done: HashMap<Long, ArrayList<String>> = HashMap(),
 	@Expose var history: LinkedList<Action<*>> = LinkedList(),
 	@Expose var markDone: Boolean = false,
-	@Expose var visCategories: HashSet<Long>? = null
+	@Expose var visCategories: HashSet<Long>? = null,
+	@Expose var lastCategory: Long = UNCATEGORIZED
 ) : Serializable {
 	fun addTask(categoryId: Long, descriptor: String, index: Int) {
 		val categoryTasks = tasks[categoryId]
