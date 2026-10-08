@@ -208,6 +208,7 @@ class CompletedTasksActivity: AppCompatActivity(), HistoryActivity {
 				currList.history.clear()
 			}
 		}
+		updateUI()
 	}
 	private fun deleteTask(action: DeleteTask) {
 		Log.i("DoneTasksActivity", "delete $action")
@@ -220,6 +221,7 @@ class CompletedTasksActivity: AppCompatActivity(), HistoryActivity {
 				currList.history.clear()
 			}
 		}
+		updateUI()
 	}
 	private fun moveTask(action: MoveTask) {
 		Log.i(MOVE_TASK, "Moving row ${action.old} to ${action.new}")
@@ -237,6 +239,7 @@ class CompletedTasksActivity: AppCompatActivity(), HistoryActivity {
 		}
 		(category.adapter as? TaskAdapter<*>)?.moveItem(action.old, action.new, false)
 		data(this).currentList().history.clear()
+		updateUI()
 	}
 	override fun event(action: Action<*>) {
 		when (action) {
