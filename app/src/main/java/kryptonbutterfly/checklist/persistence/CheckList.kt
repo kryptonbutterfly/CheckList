@@ -60,6 +60,8 @@ data class CheckList(
 				unusedCategories.remove(it.key)
 		}
 		
+		visCategories?.forEach(unusedCategories::remove)
+		
 		history.forEach { action ->
 			when(action) {
 				is CreateTask -> unusedCategories.remove(action.category)
