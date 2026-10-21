@@ -65,7 +65,7 @@ data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 	}
 	
 	private fun exists(icon: Bitmap) =
-		iconMap.entries.firstOrNull { (_, v) -> icon.sameAs(v) }?.let { (k, v) ->
+		iconMap.entries.firstOrNull { (_, v) -> icon.sameAs(v) }?.let { (k, _) ->
 			Log.d(TAG, "icon already known as: $k")
 			return@let k
 		}

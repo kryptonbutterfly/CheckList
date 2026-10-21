@@ -66,7 +66,7 @@ data class Data(
 		
 		val unusedCategories = HashSet(categories.keys)
 		lists.values.forEach { it.removeUsedCategoriesFromSet(unusedCategories) }
-		unusedCategories.forEach { it -> categories.remove(it) }
+		unusedCategories.forEach(categories::remove)
 	}
 	
 	fun pruneLists() {

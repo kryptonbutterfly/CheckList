@@ -140,7 +140,7 @@ class CreateTaskActivity : ComponentActivity() {
             (result.data?.getSerializableExtra(CATEGORY) as? Category)?.
                 also { cat ->
                     val data = data(this)
-                    data.categories.put(cat.id, cat)
+                    data.categories[cat.id] = cat
                     data.currentList().visCategories?.add(cat.id)
                     addCategory(cache(this), cat)
                     val categories = findViewById<Spinner>(R.id.spinnerCategories)

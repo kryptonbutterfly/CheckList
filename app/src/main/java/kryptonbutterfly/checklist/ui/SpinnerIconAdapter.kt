@@ -16,7 +16,7 @@ class SpinnerIconAdapter(context: ContextWrapper, items: List<SpinnerIconItem>) 
 		return createView(position, convertView, parent)
 	}
 	
-	override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View? {
+	override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
 		return createView(position, convertView, parent)
 	}
 	

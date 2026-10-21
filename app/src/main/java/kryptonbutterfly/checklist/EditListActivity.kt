@@ -114,7 +114,7 @@ class EditListActivity : ComponentActivity() {
 				list.markDone = markDone
 				data.lists[listName] = list
 				list.visCategories = filters
-			}?:also { data.lists.put(listName, CheckList(markDone = markDone, visCategories = filters)) }
+			}?:also { data.lists[listName] = CheckList(markDone = markDone, visCategories = filters) }
 	}
 	
 	private fun collectVisible() :HashSet<Long>? {

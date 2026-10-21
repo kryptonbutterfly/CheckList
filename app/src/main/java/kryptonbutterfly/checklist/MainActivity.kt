@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity(), HistoryActivity {
 		}
 	
 	private val getDoneActivity =
-		registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+		registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 			populateUI()
 		}
 	
@@ -294,7 +294,7 @@ class MainActivity : AppCompatActivity(), HistoryActivity {
 		val data = data(this)
 		val currList = data.currentList()
 		if (currList.markDone) {
-			currList.tasks.forEach { catId, cat ->
+			currList.tasks.forEach { (catId, cat) ->
 				if (cat.isNotEmpty()) {
 					val doneCat = currList.done.getOrPut(catId, ::ArrayList)
 					cat.forEach { doneCat.add(it) }
@@ -352,7 +352,7 @@ class MainActivity : AppCompatActivity(), HistoryActivity {
 				return settings.skipExistingTasks && targetList.tasks[catId]?.contains(iTask) ?: false
 			}
 			
-			importData.tasks.forEach { catName, iTasks ->
+			importData.tasks.forEach { (catName, iTasks) ->
 				data.categories.values.firstOrNull { it.name == catName }?.also { cat ->
 					iTasks.filter { taskName -> !skipTask(cat.id, taskName) }
 						.forEach { targetList.addTask(cat.id, it, -1) }
@@ -360,7 +360,7 @@ class MainActivity : AppCompatActivity(), HistoryActivity {
 					val cat = Category(data, catName, null)
 					val catId: Long
 					if (catName.isNotBlank()) {
-						data.categories.put(cat.id, cat)
+						data.categories[cat.id] = cat
 						catId = cat.id
 					} else catId = UNCATEGORIZED
 					iTasks.filter { taskName -> !skipTask(catId, taskName) }
@@ -389,7 +389,7 @@ class MainActivity : AppCompatActivity(), HistoryActivity {
 		val list = data.currentList()
 		list.tasks[UNCATEGORIZED]?.also(::printTask)
 		
-		list.tasks.forEach { catId, tasks ->
+		list.tasks.forEach { (catId, tasks) ->
 			if (tasks.isNotEmpty()) data.categories[catId]?.also { category ->
 				sb.append("## ${category.name}\n")
 				printTask(tasks)
@@ -464,7 +464,7 @@ class MainActivity : AppCompatActivity(), HistoryActivity {
 		val categoryTitle = LinearLayout(applicationContext)
 		categoryView.addView(categoryTitle)
 		categoryTitle.layoutParams = vertLayout
-		categoryTitle.setOnClickListener { view ->
+		categoryTitle.setOnClickListener {
 			val intent = Intent(this, EditCategory::class.java)
 			intent.putExtra(CATEGORY, categoryId)
 			editResult.launch(intent)
@@ -521,19 +521,20 @@ class MainActivity : AppCompatActivity(), HistoryActivity {
 	}
 	
 	private fun createTask(action: CreateTask) {
-		val tasks = getOrCreateCategory(action.category)
 		Log.i(CREATE_TASK, "Adding task @ ${action.index}")
 		
-		val i = if (action.index == -1) tasks.size else action.index.coerceIn(0, tasks.size)
-		
-		(tasks.adapter as? TaskAdapter<*>)?.also {
-			it.tasks.add(i, action.description)
+		val category = getOrCreateCategory(action.category)
+		(category.adapter as? TaskAdapter<*>)?.also {
+			(category.parent as View).visibility = VISIBLE
+			val currList = data(this).currentList()
+			val i = if (action.index == -1) it.tasks.size else action.index.coerceIn(0, it.tasks.size)
+			currList.addTask(action.category, action.description, i)
+			
 			it.notifyItemInserted(i)
 			action.doneIndex?.takeIf { index -> index > -1 }?.also { doneIndex ->
-				data(this).currentList().done[action.category]?.also { category ->
-					if (doneIndex < category.size)
-						category.removeAt(doneIndex)
-				}
+				currList.done[action.category]?.
+					takeIf {cat -> doneIndex < cat.size }?.
+					also { cat -> cat.removeAt(doneIndex) }
 			}
 		} ?: run {
 			Log.w(CREATE_TASK, "Failed to retrieve category from backing data.")

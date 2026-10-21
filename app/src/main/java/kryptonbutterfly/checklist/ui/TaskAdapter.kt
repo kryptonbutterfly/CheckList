@@ -27,7 +27,7 @@ private const val ANIMATION_DURATION: Long = 50
 class TaskAdapter<E>(
 	private val context: E,
 	var tasks: ArrayList<String>,
-	private val category: Long,
+	val category: Long,
 	var listName: String,
 	var variant: TaskVariants
 ) : RecyclerView.Adapter<TaskAdapter.ViewHolder>() where E : Context, E : HistoryActivity {

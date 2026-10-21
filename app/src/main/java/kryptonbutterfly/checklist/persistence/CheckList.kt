@@ -29,7 +29,7 @@ data class CheckList(
 		else {
 			val list = ArrayList<String>()
 			list.add(descriptor)
-			tasks.put(categoryId, list)
+			tasks[categoryId] = list
 		}
 	}
 	
