@@ -2,8 +2,6 @@
     <string name="app_name">CheckList</string>
     <string name="title_activity_create_task">CreateTaskActivity</string>
     <string name="title_activity_main">CheckList</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
     <string name="HintTaskDescription">Task</string>
     <string name="buttonCancelText">Cancel</string>
     <string name="buttonAcceptText">Accept</string>
@@ -11,9 +9,6 @@
     <string name="create_new_entry">Create new Entry</string>
     <string name="restore">restore</string>
     <string name="settings">Settings</string>
-    <string name="export">Export</string>
-    <string name="undo_max_length">max history length</string>
-    <string name="undo">Undo</string>
     <string name="title_activity_settings">Settings</string>
     <string name="switchTrackCreateTitle">create Task</string>
     <string name="switchTrackDeleteTitle">delete Task</string>
@@ -49,4 +44,7 @@
     <string name="textCompleted">Completed</string>
     <string name="button_delete_list">Delete List</string>
     <string name="filterCategoriesTitle">filter Categories</string>
+    <string name="backupTitle">Backup</string>
+    <string name="btnCreateBackup">create</string>
+    <string name="btnRestoreBackupTitle">restore</string>
 </resources>

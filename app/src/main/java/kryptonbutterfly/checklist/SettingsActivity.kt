@@ -7,11 +7,25 @@ import android.view.View
 import android.widget.NumberPicker
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.SwitchCompat
+import kryptonbutterfly.checklist.backup.Backup
 import kryptonbutterfly.checklist.persistence.data
 import kryptonbutterfly.checklist.persistence.settings
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class SettingsActivity : ComponentActivity() {
+    
+    private val getCreateBackup =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) result.data?.data?.also { Backup.create(this, it) }
+        }
+    
+    private val getRestoreBackup =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            uri?.also { Backup.restore(this, it) }
+        }
     private lateinit var spinnerMaxUndo: NumberPicker
     private lateinit var switchTrackCreate: SwitchCompat
     private lateinit var switchTrackRename: SwitchCompat
@@ -76,5 +90,21 @@ class SettingsActivity : ComponentActivity() {
     
     fun onCleanup(@Suppress("UNUSED_PARAMETER")view: View) {
         data(this).prune()
+    }
+    
+    fun onCreateBackup(@Suppress("UNUSED_PARAMETER")view: View) {
+        val dateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"))
+        val fileName = "CheckList-Backup_$dateTime.zip"
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            type = "application/zip"
+            addCategory(Intent.CATEGORY_OPENABLE)
+            putExtra(Intent.EXTRA_TITLE, fileName)
+            flags = Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        }
+        getCreateBackup.launch(intent)
+    }
+    
+    fun onRestoreBackup(@Suppress("UNUSED_PARAMETER")view: View) {
+        getRestoreBackup.launch(arrayOf("application/zip"))
     }
 }

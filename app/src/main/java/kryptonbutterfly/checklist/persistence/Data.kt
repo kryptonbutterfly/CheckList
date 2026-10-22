@@ -10,7 +10,7 @@ import java.io.File
 import java.io.Serializable
 import java.util.*
 
-private const val TASKS_LIST_FILE: String = "TasksListData.json"
+const val TASKS_LIST_FILE: String = "TasksListData.json"
 
 private fun loadData(context: Context): Data {
 	val file = File(context.filesDir, TASKS_LIST_FILE)

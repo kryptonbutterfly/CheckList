@@ -205,7 +205,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
-                android:id="@+id/categoriesTitle2"
+                android:id="@+id/importTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:paddingStart="24dp"
@@ -226,7 +226,7 @@
                 android:paddingHorizontal="24dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/categoriesTitle2">
+                app:layout_constraintTop_toBottomOf="@+id/importTitle">
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/switchSkipDuplicates"
@@ -241,6 +241,54 @@
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <TextView
+                android:id="@+id/backupTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:paddingStart="24dp"
+                android:paddingTop="24dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="4dp"
+                android:text="@string/backupTitle"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout4"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout5"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_corner_small"
+                android:paddingHorizontal="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/backupTitle">
+
+                <Button
+                    android:id="@+id/btnCreateBackup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:background="@drawable/rounded_corner"
+                    android:onClick="onCreateBackup"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/btnCreateBackup"
+                    android:textAllCaps="false"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/btnRestoreBackup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:background="@drawable/rounded_corner"
+                    android:onClick="onRestoreBackup"
+                    android:paddingHorizontal="16dp"
+                    android:text="@string/btnRestoreBackupTitle"
+                    android:textAllCaps="false"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 

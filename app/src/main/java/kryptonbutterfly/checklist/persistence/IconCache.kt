@@ -12,7 +12,7 @@ import java.io.FileOutputStream
 import kryptonbutterfly.checklist.misc.scale
 import java.util.UUID
 
-private const val ICON_CACHE_FOLDER: String = "icon_cache/"
+const val ICON_CACHE_FOLDER: String = "icon_cache/"
 private fun iconCacheFolder(context: Context): File {
 	return File(context.filesDir, ICON_CACHE_FOLDER)
 }
@@ -78,25 +78,24 @@ data class IconCache(val iconMap: HashMap<String, Bitmap> = HashMap()) {
 		return scale(source, scale)
 	}
 	
+	fun getFormat(name: String): Pair<String, Bitmap.CompressFormat> {
+		if (!name.contains('.'))
+			return name to Bitmap.CompressFormat.PNG
+		
+		val dot = name.lastIndexOf('.')
+		val extension = name.substring(dot + 1)
+		return name.substring(0, dot) to when(extension) {
+			"png" -> Bitmap.CompressFormat.PNG
+			"jpg", "jpeg" -> Bitmap.CompressFormat.JPEG
+			"webp" -> Bitmap.CompressFormat.WEBP
+			else -> Bitmap.CompressFormat.PNG
+		}
+	}
+	
 	private fun addIcon(context: Context, name: String, icon: Bitmap): String {
 		val folder = iconCacheFolder(context)
 		if (!folder.exists()) folder.mkdirs()
-		val format: Bitmap.CompressFormat
-		val iconName: String
-		if (name.contains('.')) {
-			val dot = name.lastIndexOf('.')
-			iconName = name.substring(0, dot)
-			val extension = name.substring(dot + 1)
-			format = when (extension) {
-				"png" -> Bitmap.CompressFormat.PNG
-				"jpg", "jpeg" -> Bitmap.CompressFormat.JPEG
-				"webp" -> Bitmap.CompressFormat.WEBP
-				else -> Bitmap.CompressFormat.PNG
-			}
-		} else {
-			iconName = name
-			format = Bitmap.CompressFormat.PNG
-		}
+		val (iconName, format) = getFormat(name)
 		
 		val fileName = makeUnique(iconName, format)
 		val file = File(folder, fileName)

@@ -1,15 +1,15 @@
 package kryptonbutterfly.checklist.persistence
 
-import android.content.ContextWrapper
+import android.content.Context
 import android.util.Log
 import com.google.gson.annotations.Expose
 import kryptonbutterfly.checklist.Constants.GSON
 import java.io.File
 import java.io.Serializable
 
-private const val SETTINGS_FILE: String = "Settings.json"
+const val SETTINGS_FILE: String = "Settings.json"
 
-private fun loadSettings(context: ContextWrapper):Settings {
+private fun loadSettings(context: Context):Settings {
     val file = File(context.filesDir, SETTINGS_FILE)
     if (!file.exists())
         return Settings()
@@ -19,7 +19,7 @@ private fun loadSettings(context: ContextWrapper):Settings {
     return data
 }
 
-fun saveSettings(context: ContextWrapper) {
+fun saveSettings(context: Context) {
     val json = GSON.toJson(settings)
     val file = File(context.filesDir, SETTINGS_FILE)
     if (file.exists() && json.equals(raw)) {
@@ -36,7 +36,7 @@ fun saveSettings(context: ContextWrapper) {
 
 private var raw: String? = null
 private var settings : Settings? = null
-fun settings(context: ContextWrapper): Settings {
+fun settings(context: Context): Settings {
     return settings ?: loadSettings(context).also { settings = it }
 }
 
